@@ -145,7 +145,7 @@ We conducted our experiments with a collection of small simple robots called ``S
 	\label{fig:smarticle}
 \end{figure}
 
-We place three Smarticles on a flat aluminium plate, inside a glued-down plastic ring (fig. \ref{fig:super3}). By moving their arms, the robots can push off each other, while the ring prevents them from decoupling -- thus forming an optimal play-ground to look for dynamical emergence. To get data, we use Optotrack \todo{details} to track the full time-evolution of the 2D coordinates and body-angle $ (x,y,\theta) $ of each robot at 120 frames per second (we do not track the arm positions). 
+We place three Smarticles on a flat aluminium plate, inside a glued-down plastic ring (fig. \ref{fig:super3}). By moving their arms, the robots can push off each other, while the ring prevents them from decoupling -- thus forming an optimal play-ground to look for dynamical emergence. To get data, we use Optitrack \todo{details} to track the full time-evolution of the 2D coordinates and body-angle $ (x,y,\theta) $ of each robot at 120 frames per second (we do not track the arm positions). 
 
 For experiment prototyping and better sampling statistics, we have also built a simulation of this setup, described in Appendix \ref{app:simulation}, and benchmarked it against experiments. Both experimental and simulation data are then fed through a pre-processing pipe-line, which mods out the rotation and permutation symmetries of the 3-Smarticle setup, thus reducing the effective configuration space substantially (Appendix \ref{app:dataAnal}).
 
@@ -156,7 +156,8 @@ For experiment prototyping and better sampling statistics, we have also built a 
 \end{figure}
 
 \section{Regularization}
-When all the Smarticles are executing a phase-synchronized square gait, the triplet typically organizes into one of several periodic dynamical patterns (a sort of collective organized dance) \todo{videos in supplement}. Figure \ref{fig:configSpace} gives some illustration of the fine-tuning. Such self-organization is perplexing, and its interpretation depends on the perspective we take -- that of dynamical systems theory, or thermodynamics.
+When all the Smarticles are executing a phase-synchronized square gait, the triplet typically organizes into one of several periodic dynamical patterns (a sort of collective organized dance) \todo{videos in supplement}. Figure \ref{fig:configSpace} gives some illustration of the fine-tuning associated with this. Such self-organization is perplexing, and its interpretation depends on the perspective we take -- that of dynamical systems theory, or thermodynamics.
+\todo{not synchronization}
 
 \begin{figure}
 	\includegraphics[width=0.7\textwidth]{scatter.pdf}
@@ -166,9 +167,13 @@ When all the Smarticles are executing a phase-synchronized square gait, the trip
 
 From the context of dynamical systems, perhaps it is not surprising that the dynamics of a time-periodic system are governed by several limit-cycle attractors. On the other hand, not all periodic systems relax to such attractors -- even here we can make slight changes to our setup, such as changing relative gait phases, or making Smarticles inertial \todo{figures for this here?}, so as to make the system behave chaotically. Furthermore, this system cannot really be seen as deterministic, as we know that it is strongly affected by the stochasticity coming from the hard-boundary interactions between non-smooth shapes, and highly surface-sensitive effects of sliding friction.
 
-From the perspective of equilibrium thermodynamics, where entropy and disorder tend to a maximum, this sort of self-organization may seem extremely surprising. Of course, this system is far from equilibrium, and so entropy need not grow. Indeed, for a Brownian particle diffusing in a compact domain of inhomogeneous temperature $ T(\v{x}) $ (and no other forces), we know that the steady-state probability distribution will be $ p_{s.s.} \propto 1/T(\v{x}) $ -- which is far from the maximum-entropy uniform distribution. We want to use this example to motivate our explanation of the fine-tuning we observe. 
+From the perspective of equilibrium thermodynamics, where entropy and disorder tend to a maximum, this sort of self-organization may seem extremely surprising. Of course, this system is far from equilibrium, and so entropy need not grow. Indeed, for a Brownian particle diffusing in a compact domain of inhomogeneous temperature $ T(\v{x}) $ (and no other forces), we know that the steady-state probability distribution will be $ p_{s.s.} \propto 1/T(\v{x}) $ -- which is far from the maximum-entropy uniform distribution. We want to use this example to motivate our explanation of the fine-tuning we observe.
 
-While we could try to go into a mechanistic explanation for the self-organization in our setup, it would likely be very specific to the parameters and choices used here and would not generalize well to other configurations of Smarticles, or to other active matter systems. Instead, we want to give a less fundamental, but more generalizable explanation. We note that for most initial configurations of the three Smarticles in a ring, after one period of arm motion they go to a new configuration. For some specific configurations, however, they do -- and these are precisely the periodic limit-cycle attractors we see in any long trajectory (fig. \ref{fig:configSpace}). This may at first seem tautological: at long times the system tends to be found in places from where it does not leave. The rest of the paper will be explaining why this is both, highly non-trivial in a precise mathematical sense, and also enlightening in understanding real-world strongly-driven systems \todo{references to sections}.
+
+
+While we could try to go into a mechanistic explanation for the self-organization in our setup, it would likely be very specific to the parameters and choices used here and would not generalize well to other configurations of Smarticles, or to other active matter systems. Instead, we want to give a less fundamental, but more generalizable explanation. We note that for most initial configurations of the three Smarticles in a ring, after one period of arm motion they go to a new configuration. For some specific configurations, however, they stay in the same place -- and these are precisely the periodic limit-cycle attractors we see in any long trajectory (fig. \ref{fig:configSpace}). This may at first seem tautological: at long times the system tends to be found in places from where it does not leave. The rest of the paper will be explaining why this is both, highly non-trivial in a precise mathematical sense, and also profound for understanding real-world strongly-driven systems \todo{references to sections}.
+
+
 
 
 \appendix
