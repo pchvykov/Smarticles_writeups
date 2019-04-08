@@ -155,11 +155,22 @@ For experiment prototyping and better sampling statistics, we have also built a 
 \end{figure}
 
 \section{Regularization}
-When all the Smarticles are executing a phase-synchronized square gait, the triplet typically organizes into one of several periodic dynamical patterns (a sort of collective organized dance) \todo{videos in supplement}. Figure \ref{fig:configSpace} gives some illustration of the fine-tuning associated with this \todo{better visualization of regular states???}. Such self-organization is perplexing, and its interpretation depends on the perspective we take -- that of dynamical systems theory, or thermodynamics.
+
+\begin{figure}
+	\includegraphics[width=0.6\textwidth]{wavelet.pdf}
+	\caption{Wavelet transform of dynamics, simulation}
+	\label{fig:wavelet}
+\end{figure}
+
+In general, the response properties of a dynamical system to an external drive will depend on the system's configuration. In particular, a given drive can cause chaotic motion in some parts of the configuration space, while being perfectly organized elsewhere. To check if this applies here, we set all three Smarticles to execute a phase-synchronized square gait inside a glued-down ring, track the trajectories, and plot out the wavelet transform of the orientation of any one Smarticle -- fig. \ref{fig:wavelet}. As the energy from the drive is injected at a particular frequency, we always see a peak in the power-spectrum there. On the other hand, the amount to which that energy gets dispersed to other frequencies before dissipating out varies as the system explores different configurations over time. In the regions where a large broad-band component emerges, we have very noisy dynamics. The lack of a broad-band component, on the other hand, indicates that the dynamics are orderly, which we may be surprised to find in such a messy system. 
+
+%While there is always a peak in the power-spectrum at the driving frequency, the broad-band amplitude (particularly obvious in lower frequencies) clearly changes over time. As broad-band of the power-spectrum accounts for the disordered component of the motion, this illustrates that dynamics go through periods with more or less effective noise. 
+%When all the Smarticles are executing a phase-synchronized square gait,
+Taking a closer look at these regular dynamics, we see that there the three Smarticles organize into one of several periodic dynamical patterns (a sort of collective organized dance) \todo{videos in supplement}. Figure \ref{fig:configSpace} gives some illustration of the fine-tuning associated with this \todo{better visualization of regular states???}. Such self-organization is perplexing, and its interpretation depends on the perspective we take -- that of dynamical systems theory, or thermodynamics.
 \todo{not synchronization}
 
 \begin{figure}
-	\includegraphics[width=0.7\textwidth]{scatter_FT.pdf}
+	\includegraphics[width=0.7\textwidth]{scatter.png}
 	\caption{Stroboscopic, 3D projection resolving clusters, of some function of the 9D space (see \ref{app:dataAnal}), ordered v null, color by delta over one period \todo{use exp't data for ordered, and simulation for null}
 	\todo{regular states for different drives on same axes}}
 	\label{fig:configSpace}
@@ -174,7 +185,7 @@ Indeed, the intuition is the same: probability concentrates in regular states, w
 %While we could try to go into a mechanistic explanation for the self-organization in our setup, it would likely be very specific to the parameters and choices used here and would not generalize well to other configurations of Smarticles, or to other active matter systems. Instead, we want to give a less fundamental, but more generalizable explanation. We note that for most initial configurations of the three Smarticles in a ring, after one period of arm motion they go to a new configuration. For some specific configurations, however, they stay in the same place -- and these are precisely the periodic limit-cycle attractors we see in any long trajectory (fig. \ref{fig:configSpace}). This may at first seem tautological: at long times the system tends to be found in places from where it does not leave. The rest of the paper will be explaining why this is both, highly non-trivial in a precise mathematical sense, and also profound for understanding real-world strongly-driven systems \todo{references to sections}.
 
 \section{Defining $ T_{eff} $}
-The question, therefore, is how can we extract a measure of effective noise amplitude from looking at short trajectories. On one hand this system is periodic in time, so one natural metric would be to look at the distance it moves in configuration space over one period. Another natural metric could be inspired by Brownian dynamics $ \dot{x}=\sqrt{2\;T(x)}\cdot\xi $, and so $ T(x)=\int dt\;\<\dot{x}(t)\;\dot{x}(0)\>/2 $, or in higher dimension, we can take the trace of the correlator $ T(x)=\sum_i\<\dot{x}_i\;\dot{x}_i\>/2 $. 
+The question, therefore, is how can we extract a measure of effective noise amplitude from looking at short trajectories. On one hand this system is periodic in time, so one natural metric would be to look at the distance it moves in configuration space over one period. Another natural metric could be inspired by Brownian dynamics $ \dot{x}=\sqrt{2\;T(x)}\cdot\xi $, and so $ T(x)=\int dt\;\<\dot{x}(t)\;\dot{x}(0)\>/2 $, or in higher dimension, we can take the trace of the correlator $ T(x)=\sum_i\<\dot{x}_i\;\dot{x}_i\>/2 $ (see Appendix \ref{app:defRatt} for details). 
 We then color the points in fig. \ref{fig:configSpace} by this $ T_{eff} $, and see that the regions of low $ T_{eff} $ correspond precisely to the concentration of steady-state probability. More precisely, fig. \todo{fig:corr} shows the scatter plot of $ p_{s.s.}(x) $ vs. $ T_{eff}(x) $, showing the correlation.
 
 Note that this may at first seem tautological: at long times the system tends to be found in places from where it does not leave. However, below we will explain why this is both, highly non-trivial in a precise mathematical sense, and also profound for understanding real-world strongly-driven systems 
@@ -184,6 +195,10 @@ Why should a driven dynamical system get an inhomogeneous $ T_{eff}(x) $ landsca
 
 Another prediction we can make from our framework is that raising the apparent noise uniformly for all configurations $ T_{eff}(\v{x}) \rightarrow T_{eff}(\v{x})+T_0$ will effectively level the steady-state distribution for a large enough $ T_0 $, and thus break the regularization we observe. Experimentally we can realize this by putting smarticles on top of a bed of small, light beads (fig. \todo{smarticles on beads}), thus effectively reducing the friction between Smarticles and the table. This makes every interaction have a larger and less predictable effect, which affects all states in a very similar manner.
 
+\todo{Random correlated arms}\\
+\todo{example with more Smarticles}\\
+\todo{inertial smarticles}\\
+\todo{drive-specificity: change drive only and show T(x) change}
 %This results in certain configurations being selected by any given drive as having a lower effective noise, and thus becoming attractive. We can illustrate this intuition by changing the gait in our Smarticle system, and seeing new configurations becoming attractive. 
 
 
@@ -200,12 +215,18 @@ Our $ T_{eff}(\v{x}) $ is effectively a measure of instability of the configurat
 \end{figure}
 
 There are several ways to make this discussion more precise. One way to look at it is to consider a Markov process $ \dot{p}_i= \sum_j R_{ji}\, p_j - \sum_j R_{ij}\, p_i $, with $ N $ states $ i\in\{1,...,N\} $. In general the steady-state distribution $ p_{s.s.}(i) $ will depend on all the $ N^2 $ transition rates. Now, if we let the transition rates $ R_{ij} $ to be independent identically distributed random variables (with some mean $ \bar{R} $ and standard deviation $ \sigma $), and let $ N \rightarrow \infty$, then it is easy to show \todo{Appx or citation} that $ p_{s.s.}(i)= \frac{1}{N} + \sum_j (R_{ji} - R_{ij})/(N^2\,\bar{R}) + \bigO{N^{-3}}$. The first term $ \sum_j R_{ji} $ is the total entrance rate into state $ i $, and may in a real system be hard to measure, as it would require initializing the system in all possible configurations and seeing how often it enters $ i $. The second term $ \sum_j R_{ij} $, on the other hand, is the total exit rate, and is akin to our measure of $ T_{eff} $ -- it is basically a measure of how stable the state $ i $ is and only requires local measurements initialized in that state. We can rewrite the expression for the steady-state focusing on the exit rates: $ p_{s.s.}(i)= \frac{\bar{R}}{\sum_j R_{ij}} + \frac{\sigma}{\bar{R}\,N^{3/2}}\, \xi_i$, where $ \xi_i \equiv  \sum_j \(R_{ji}-\bar{R}\)/\(\sigma\,\sqrt{N}\)\sim 
-\mathcal{N}[0,1]$ -- univariate Gaussian random variable. So while in general we need all $ N^2 $ rates to predict the steady-state, the randomness in rates allows us to express it in terms of just $ N $ local measurements of the exit rates, up to a noise term from  the unobserved entrance rates \ref{fig:randDynamics}a.
+\mathcal{N}[0,1]$ -- univariate Gaussian random variable (note however that it is correlated with $ p_{s.s.}(i) $). So while in general we need all $ N^2 $ rates to predict the steady-state, the randomness in rates allows us to express it in terms of just $ N $ local measurements of the exit rates, up to a noise term from  the unobserved entrance rates \ref{fig:randDynamics}a.
 %This simple model thus qualitatively reproduces what we observe in the Smarticle system: that exit rate is predictive of the steady-state density, albeit not perfectly because of the additional influence of the entrance rates 
 
 It turns out we can make an even stronger statement if we consider the $ d $-dimensional diffusion process on a compact domain $ \dot{x}_i = D_{ij}(x)\cdot\xi_j $ [Ito], $ i\in\{1,...,d\} $, $ \v{x}\in\mathbb{D}^d $, where the diffusion tensor $ D_{ij} $ varies smoothly over $ x $, but is otherwise random. Again, as this is a non-equilibrium process, in general the steady-state density at any point will depend globally on the diffusion tensor everywhere: $ p_{s.s.}(x) = f_x\[D_{ij}(y)\; |\; y\in \mathbb{D}^d \]$. However, the random choice of $ D_{ij}(x) $ simplifies this result: we can numerically show that $ p_{s.s.}(x) \sim 1/\tr\(T(x)\) $ for $ T \equiv D\, D^T$ \ref{fig:randDynamics}b, as long as the variation of $ \tr\(T(x)\) $ is sufficiently large. 
 
-Finally, we can also frame our results in a somewhat different light. We think of approximating the system behavior by ``typical'' dynamics that match the local fluctuation amplitude of the system $ T_{eff}(x) $. Concretely, we find the maximum-entropy (or ``max-caliber'' \todo{cite}) probability distribution over trajectories $ P[\v{x}(t)] $, constraining the local velocity fluctuations: maximize $ \mathcal{S} = P[x] \;\log\(P[x]\) + \lambda_0 \( \int \mathcal{D} x \;P[x] - 1\) + \int dX \; \lambda(X) \(\sum _i \< \dot{x}_i\,\dot{x}_i\> _X - T_{eff}(X)\)$, where $ \< \dot{x}_i\, \dot{x}_i\> _X \equiv \int \mathcal{D}x \; P[x] \,\int dt \; \dot{x}_i(t) \dot{x}_i(t) \,\delta(x(t) - X) $. This gives $ P[x(t)] \propto \exp{-\sum_i \int dt \; \lambda(x(t))\,\dot{x}_i(t)\dot{x}_i(t)} $, which corresponds to the stochastic process $ \dot{x}_i = \sqrt{2\,T_{eff}(x)}\cdot \xi_i$, whose steady-state distribution is $ p_{s.s.}(x)\propto 1/T_{eff}(x) $. Thus, while the exact dynamics generally give a complicated $ p_{s.s.}(x) $, we can view $1/T_{eff}(x) $ as the least-informative approximation based on only local information.
+Finally, we can also frame our results in a somewhat different light. 
+Thus, while the exact dynamics generally give a complicated $ p_{s.s.}(x) $, we can view $1/T_{eff}(x) $ as the least-informative approximation based on only local information.
+We think of approximating the system behavior by ``typical'' dynamics that match the local fluctuation amplitude of the system $ T_{eff}(x) $. Concretely, we find the maximum-entropy (or ``max-caliber'' \todo{cite}) probability distribution over trajectories $ P[\v{x}(t)] $, constraining the local velocity fluctuations: maximize 
+\begin{align*}
+\mathcal{S} = P[x] \;\log\(P[x]\) + \lambda_0 \( \int \mathcal{D} x \;P[x] - 1\) + \int dX \; \lambda(X) \(\sum _i \< \dot{x}_i\,\dot{x}_i\> _X - T_{eff}(X)\)
+\end{align*}, where $ \< \dot{x}_i\, \dot{x}_i\> _X \equiv \int \mathcal{D}x \; P[x] \,\int dt \; \dot{x}_i(t) \dot{x}_i(t) \,\delta(x(t) - X) $. This gives $ P[x(t)] \propto \exp{-\sum_i \int dt \; \lambda(x(t))\,\dot{x}_i(t)\dot{x}_i(t)} $, which corresponds \todo{uniquely} to the stochastic process $ \dot{x}_i = \sqrt{2\,T_{eff}(x)}\cdot \xi_i$, whose steady-state distribution is $ p_{s.s.}(x)\propto 1/T_{eff}(x) $. \todo{explain this paragraph better - too dense, and interesting}
+
 
 \todo{coordinate dependence}
 
@@ -229,8 +250,11 @@ For easier exploration of hypothesis space of this system, we have constructed a
 	\item  If two arms are near-parallel when they approach each other, they can pass through each other between ticks without ever intersecting. To prevent this, along with collision detection, we must explicitly test for this in each pair. We then store the order of the arms for a few ticks into the future to prevent them passing through each other in any of those times.
 	\item In case a smarticle with small friction gets trapped between two others, it might rattle back and forth on each iteration of collision-resolution, with no net effect. To prevent this, we temporarily (until next tick) increase its friction each time a smarticle moves.
 	\item In experiment, when resolving collision is too hard, the motor simply does not move (jams up). To allow for that possibility in simulation, we add an exit condition from the collision-resolving loop for when any one smarticle's temporary friction (from last bullet) becomes very large - as this serves as a proxy for how much force a motor must provide. We then move the most colliding arm back to its last time-step, and try collision-resolving again. If everything resolves, that arm will then have a chance to catch up to where it needed to be over the following ticks (its speed being capped at some $ \omega_{max} $).
-	\item The resulting simulation turns out to be too clean, despite the multiple stochastic elements of the algorithm, and so dynamical phases much more stable than in experiments. Since we want to study transition statistics, we must find ways to destabilize them. There are a number of places we can add more noise: slight fluctuations of smarticles' positions and angles at each tick, or proportional to each move, randomly varying gait amplitude, varying arm velocity, etc.
+	\item The resulting simulation turns out to be too clean, despite the multiple stochastic elements of the algorithm, and so dynamical phases much more stable than in experiments. Since we want to study transition statistics, we must find ways to destabilize them. There are a number of places we can add more noise: slight fluctuations of smarticles' positions and angles at each tick, or proportional to each move, randomly varying gait amplitude, varying arm velocity, etc. Adding inertia or inter-Smarticle friction forces (see below) also helps to destabilize the dynamics.
 	\item The ring boundary is implemented similar to other smarticles, and collisions with it are resolved in the same loop. Alternatively, we can implement weakly confining potential to keep smarticles together in a more smooth way (for different experiments).
+	\item It is easy to adjust the simulation to give the Smarticle inertia: at each tick, simply move them according to last step's velocity. 
+	\item  If inter-Smarticle friction is 0, then each interaction force is directed normal to one Smarticle's surface. To include effects of such friction, we can add a small lateral component to these forces according to the interaction angle.  
+%	we can also approximate the influence of inter-Smarticle friction by turning the interaction force from the surface normal slightly.
 \end{itemize}
 
 Even with all these additions, many differences remain between simulation and experiment: smarticles have non-zero thickness in experiments, friction forces between smarticles are often important on collisions, there are relief features on smarticle body not present in simulation that can get caught, etc. The consequence in this system is that while qualitative features can be recovered in the simulation, we don't generally expect quantitative agreement. We guess that these differences may become less important for ensembles with more smarticles -- as universal collective properties start to dominate. We also guess that analytical predictive power of least-rattling, or other similar techniques, could be more applicable in that regime.
@@ -259,7 +283,7 @@ Doing this exactly is an insurmountable feat, and so we must resort to reasonabl
 	\end{subfigure}
 	\begin{subfigure}[t]{0.5\textwidth}
 		\includegraphics[width=1\textwidth]{wavelet.eps}
-		\caption{Wavelet transform of one of the curves in \ref{fig:piDat}. We choose the values along the bright line for our feature vector. \label{fig:wavelet}}
+		\caption{Wavelet transform of one of the curves in \ref{fig:piDat}. We choose the values along the bright line for our feature vector. \label{fig:waveletDat}}
 	\end{subfigure}
 	
 	\caption{Data processing steps} \label{fig:1}
@@ -292,7 +316,7 @@ Now that we have our feature vector, we can dimensionally reduce or cluster the 
 
 We use Matlab's built-in t-Distributed Stochastic Neighbor Embedding (tSNE) algorithm, which basically tries to embed the data in a 2D space preserving all the pair-wise distances as much as possible (fig. \ref{fig:dimRedExp}). It has the effect of largely preserving, or even highlighting, clusters in the original data, but also allows visualizing transitions between them and other hierarchical structure in the data. Note that the two pairs of clusters corresponding to the same pictures are chiral complements (the other two clusters correspond to non-chiral states). In section \ref{sec:dynPhaseTrans} below we will cluster this data and study the slow transition statistics between different dynamical phases.
 
-
+\subsection{Defining $ T_{eff} $} \label{app:defRatt}
 
 \section{Random dynamical systems}
 \subsection{Random Markov process}
