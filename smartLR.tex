@@ -4,7 +4,8 @@
 % ***********************************************************
 % ******************* MY HEADER ************************
 % ***********************************************************
-\documentclass[11pt]{article}
+%\documentclass[11pt]{article}
+\documentclass[reprint,prx]{revtex4-1}
 %\documentclass[prb]{revtex4-1}
 %\documentclass[twocolumn,showpacs,preprintnumbers,amsmath,amssymb,superscriptaddress]{revtex4-1}
 %\usepackage[greek, english]{babel}
@@ -121,26 +122,33 @@
 
 \tableofcontents
 
-\begin{itemize}
-	\item Introduction
-	\item regularization in smarticles
-	\item Effective noise Teff, correlation
-	\item Other configurations: random, phase-offset
-	\item breaking this - inertial (do exp't with less inertia?)
-	\item RWRM -- graph and diffusion
-	\subitem as max-caliber
-	\item Discussion
-\end{itemize}
+%\begin{itemize}
+%	\item Introduction
+%	\item regularization in smarticles
+%	\item Effective noise Teff, correlation
+%	\item Other configurations: random, phase-offset
+%	\item breaking this - inertial (do exp't with less inertia?)
+%	\item RWRM -- graph and diffusion
+%	\subitem as max-caliber
+%	\item Discussion
+%\end{itemize}
 
 \section{Introduction}
+A common intuition is that it is much easier to get a collection of many particles to move in a disorderly way than in an orderly one. To found this idea more rigorously, one may invoke the idea of molecular chaos, which supposes that simple, non-linear pair forces acting amongst many colliding particles will lead to quasi-random motion. By definition, specific patterns of order in structure or dynamics are extremely rare compared with the vast array of alternative states or trajectories for the system, and when fluctuations from molecular chaos are uniform across a whole configuration space, order is disfavored in proportion to this rarity.  
+
+Once the strength of fluctuations is allowed to vary across space, however, it is clear even in simple systems that random motion can itself be the cause of low-entropy ordering.  A one-dimensional Fokker-Planck equation with a spatially-varying diffusion coefficient yields a steady-state probably distribution shaped like p(x)~1/D(x), which means one may favor one location in space over all others simply by making the stochastic noise much weaker there.  Indeed the transport of Brownian particles by thermophoresis is thought to operate by this mechanism, and in such cases, the spatial variation of noise is imposed externally through the creation of a thermal gradient. In many-body systems driven by time-varying forces, however, molecular chaos allows for inhomogeneity of fluctuations across configuration space to be an emergent property of how the internal dynamical rules combine with the particular pattern of driving.  Such scenarios abound in active matter, pointing to the possibility of understanding spontaneous order in these systems by investigating fluctuations.
+
+Active matter can be described as a diverse class of externally-driven many-particle systems that are fed by energy sources distributed over many microscopic degrees of freedom. Active matter systems have recently attracted intense interest from both experimenters and theorists, particularly as more examples have been discovered where an inverse cascade of energy from microscopic to macroscopic scales gives rise to complex ordered structures and system-scale dynamical patterns. Self-propelled colloidal particles, for example, have been shown to assemble into highly dynamic “living crystal” structures [44], while motor-driven protein filaments were observed to form large-scale spiral whorls and topological defects [50, 27]. With the advent of swarm robotics, it has also become possible to study active matter experimentally with a greater degree of control and detail….
+
 
 \section{Smarticles}
 We conducted our experiments with a collection of small simple robots called ``Smarticles'' (smart active particles) (fig. \ref{fig:smarticle}). Each one is comprised of three connected links, with the two hinges being controlled by a programmable micro-controller via stepper motors. When the Smarticle is sitting on its base, the arms do not touch the ground, and so an individual smarticle cannot move. A group of them, on the other hand, can achieve complex motion by pushing off each other. Here we will focus on the regime where their arms are executing a periodic motion pattern, which we call ``gait,'' with no feedback from the environment (note that the gait timing is kept by the controller, and hence the cycle's phase is not affected by forces on the arms). Such gaits can be represented (uniquely up to rate) as closed loops in the two-dimensional conformation space (the two hinge angles) of the Smarticle (fig. \ref{fig:smarticle}). In the first part of the paper, we will have all Smarticles execute a synchronized ``square'' gait (fig. \ref{fig:smarticle}). \todo{Include all the technical details of realization and construction of Smarticles and synchronization in an appendix?}
 
+The whole setup placed on an aluminum plate leveled to $ < 0.1\deg $. The ring is 19.2 cm in diameter, and is glued to the plate below such that it cannot move or deform. The smarticles perform a square gait locked in phase with each other.
 
 \begin{figure} 
-	\includegraphics[width=0.3\textwidth]{Smarticle.pdf}
-	\caption{\todo{label base} single smarticle with various sensors labelled}
+	\includegraphics[width=0.5\textwidth]{expt.pdf}
+	\caption{a) Diagram of a single Smarticle robot. b) One simple setup to look for collective self-organizing dynamics (view from above).}
 	\label{fig:smarticle}
 \end{figure}
 
@@ -148,19 +156,15 @@ We place three Smarticles on a flat aluminium plate, inside a glued-down plastic
 
 For experiment prototyping and better sampling statistics, we have also built a simulation of this setup, described in Appendix \ref{app:simulation}, and benchmarked it against experiments. Both experimental and simulation data are then fed through a pre-processing pipe-line, which mods out the rotation and permutation symmetries of the 3-Smarticle setup, thus reducing the effective configuration space substantially (Appendix \ref{app:dataAnal}).
 
-\begin{figure}
-	\includegraphics[width=0.3\textwidth]{3smRg.pdf}
-	\caption{View from above. Regular state testing setup. The whole setup placed on an aluminum plate leveled to $ < 0.1\deg $. The ring is 19.2 cm in diameter, and is glued to the plate below such that it cannot move or deform. The smarticles perform a square gait locked in phase with each other.}
-	\label{fig:super3}
-\end{figure}
+
 
 \section{Regularization}
 
-\begin{figure}
-	\includegraphics[width=0.6\textwidth]{wavelet.pdf}
-	\caption{Wavelet transform of dynamics, simulation}
-	\label{fig:wavelet}
-\end{figure}
+\begin{figure*}
+	\includegraphics[width=1\textwidth]{3regularization.png}
+	\caption{a) Synchronized ``square gait'' arm motion pattern of the three smarticles; b) Wavelet transform of one Smarticle's x-coordinate over a 10-min experimental run. Broad-band amplitude plotted below indicates how organized the dynamics are at different times. c) Dynamical regular states that emerge in this setup: initial conditions for each [exp't]; time evolution along the color-axis (as labeled in (a)) for 3 gait periods [sim]; system position in its configuration space (stroboscopic, projected to 3D) - blue points sampled from long-time evolution, red sampled by randomly dropping smarticles in the ring [sim] -- illustrating the spontaneous fine-tuning (note: states I and II are indistinguishable in this projection; states III and IV have two chiral compliments). d) Configuration space points colored by $\log(\det \<T_{eff}\>)$ of their neighborhood [sim] -- long trajectories spend most of their time in low-$T_{eff}$ regions. e) correlation illustrating steady-state probability $p_{s.s.} \propto 1/\det \<T_{eff}\>$ (black line): experimental data for long trajectories is in grey, simulation data is in blue/red (for different regions of configuration space, as in (c))}.
+	\label{fig:reg}
+\end{figure*}
 
 In general, the response properties of a dynamical system to an external drive will depend on the system's configuration. In particular, a given drive can cause chaotic motion in some parts of the configuration space, while being perfectly organized elsewhere. To check if this applies here, we set all three Smarticles to execute a phase-synchronized square gait inside a glued-down ring, track the trajectories, and plot out the wavelet transform of the orientation of any one Smarticle -- fig. \ref{fig:wavelet}. As the energy from the drive is injected at a particular frequency, we always see a peak in the power-spectrum there. On the other hand, the amount to which that energy gets dispersed to other frequencies before dissipating out varies as the system explores different configurations over time. In the regions where a large broad-band component emerges, we have very noisy dynamics. The lack of a broad-band component, on the other hand, indicates that the dynamics are orderly, which we may be surprised to find in such a messy system. 
 
@@ -169,12 +173,7 @@ In general, the response properties of a dynamical system to an external drive w
 Taking a closer look at these regular dynamics, we see that there the three Smarticles organize into one of several periodic dynamical patterns (a sort of collective organized dance) \todo{videos in supplement}. Figure \ref{fig:configSpace} gives some illustration of the fine-tuning associated with this \todo{better visualization of regular states???}. Such self-organization is perplexing, and its interpretation depends on the perspective we take -- that of dynamical systems theory, or thermodynamics.
 \todo{not synchronization}
 
-\begin{figure}
-	\includegraphics[width=0.7\textwidth]{scatter.png}
-	\caption{Stroboscopic, 3D projection resolving clusters, of some function of the 9D space (see \ref{app:dataAnal}), ordered v null, color by delta over one period \todo{use exp't data for ordered, and simulation for null}
-	\todo{regular states for different drives on same axes}}
-	\label{fig:configSpace}
-\end{figure}
+
 
 From the context of dynamical systems, perhaps it is not surprising that the dynamics of a time-periodic system are governed by several limit-cycle attractors. On the other hand, not all periodic systems relax to such attractors -- even here we can make slight changes to our setup, such as changing relative gait phases, or making Smarticles inertial \todo{figures for this here?}, so as to make the system behave chaotically. Furthermore, this system cannot really be seen as deterministic, as we know that it is strongly affected by the stochasticity coming from the hard-boundary interactions between non-smooth shapes, and highly surface-sensitive effects of sliding friction.
 
@@ -185,10 +184,17 @@ Indeed, the intuition is the same: probability concentrates in regular states, w
 %While we could try to go into a mechanistic explanation for the self-organization in our setup, it would likely be very specific to the parameters and choices used here and would not generalize well to other configurations of Smarticles, or to other active matter systems. Instead, we want to give a less fundamental, but more generalizable explanation. We note that for most initial configurations of the three Smarticles in a ring, after one period of arm motion they go to a new configuration. For some specific configurations, however, they stay in the same place -- and these are precisely the periodic limit-cycle attractors we see in any long trajectory (fig. \ref{fig:configSpace}). This may at first seem tautological: at long times the system tends to be found in places from where it does not leave. The rest of the paper will be explaining why this is both, highly non-trivial in a precise mathematical sense, and also profound for understanding real-world strongly-driven systems \todo{references to sections}. 
 
 \section{Defining $ T_{eff} $}
-The question, therefore, is how can we extract a measure of effective noise amplitude from looking at short trajectories. On one hand this system is periodic in time, so one natural metric would be to look at the distance it moves in configuration space over one period. Another natural metric could be inspired by Brownian dynamics $ \dot{x}=\sqrt{2\;T(x)}\cdot\xi $, and so $ T(x)=\int dt\;\<\dot{x}(t)\;\dot{x}(0)\>/2 $, or in higher dimension, we can take the trace of the correlator $ T(x)=\sum_i\<\dot{x}_i\;\dot{x}_i\>/2 $ (see Appendix \ref{app:defRatt} for details). 
+The question, therefore, is how can we extract a measure of effective noise amplitude from looking at short trajectories. On one hand this system is periodic in time, so one natural metric would be to look at the distance it moves in configuration space over one period. Another natural metric could be inspired by Brownian dynamics $ \dot{x}=\sqrt{2\;T(x)}\cdot\xi $, and so \todo{T inference }$ T(x)=\int dt\;\<\dot{x}(t)\;\dot{x}(0)\>/2 $, or in higher dimension, we can take the trace of the correlator $ T(x)=\sum_i\<\dot{x}_i\;\dot{x}_i\>/2 $ (see Appendix \ref{app:defRatt} for details). 
 We then color the points in fig. \ref{fig:configSpace} by this $ T_{eff} $, and see that the regions of low $ T_{eff} $ correspond precisely to the concentration of steady-state probability. More precisely, fig. \todo{fig:corr} shows the scatter plot of $ p_{s.s.}(x) $ vs. $ T_{eff}(x) $, showing the correlation.
 
 Note that this may at first seem tautological: at long times the system tends to be found in places from where it does not leave. However, below we will explain why this is both, highly non-trivial in a precise mathematical sense, and also profound for understanding real-world strongly-driven systems 
+\begin{figure}
+	\includegraphics[width=0.5\textwidth]{inertial.png}
+	\caption{Destroying regularization by reducing Smarticle damping. a) The overdamped run (black points, from fig. \ref{fig:reg}e) is predictive of all simulations with lower damping (color = velocity decay time-scale $ \tau $), which fall along the same line; light grey -- experimental data for weakly-damped Smarticles. b) Effect of damping on $ p_{s.s.} $ at 1000 different points in configuration space [sim] (color by plot's left edge); black curve is a theoretical prediction for the upper edge (with one fitting parameter).}
+	\label{fig:inertial}
+\end{figure}
+Colored points lie along the black ones, indicating that $T_{eff}$ is predictive of $p_{s.s.}$, whether the noise comes from inertia or from chaotic interactions \todo{universality}.
+ 
 
 \section{Drive-specificity}
 Why should a driven dynamical system get an inhomogeneous $ T_{eff}(x) $ landscape? For a given form of the drive signal, different system configurations will have a different response. In particular, some configurations will respond in a more predictable way than others. In our Smarticle setup, for some initial conditions the sources of stochasticity (such as corner collisions) will be more prevalent than elsewhere. This way, a system settles into drive-specific configurations that give more orderly and stable response properties, and changing the drive will change these selected states. For Smarticles, this would imply that the regular states found at long times are specific to the gait, which is confirmed in experiments (fig. \todo{different gait reg states}). To illustrate that our approach generalizes beyond periodically-driven systems, we can even make the gait random in time, though identical across Smarticles to allow diversity of response properties \todo{figure}.
@@ -200,7 +206,13 @@ Another prediction we can make from our framework is that raising the apparent n
 \todo{inertial smarticles}\\
 \todo{drive-specificity: change drive only and show T(x) change}
 %This results in certain configurations being selected by any given drive as having a lower effective noise, and thus becoming attractive. We can illustrate this intuition by changing the gait in our Smarticle system, and seeing new configurations becoming attractive. 
-
+\begin{figure}
+	\includegraphics[width=0.5\textwidth]{otherRuns.png}
+	\caption{a) A-periodic drive: arms move in a random, but synchronized fashion. $ T_{eff} $ distribution is different from fig.\ref{fig:reg}d -- different regular states emerge. $ p_{s.s.} $ is still strongly correlated with $ T_{eff} $, though the exponent is no longer -1. Grey -- random and independent arm motion, leaving no structure in the drive for adaptation. b) 5 Smarticle group executing synchronized square gait shown similarly produces fine-tuned regular states (two sample ones are shown). Note that most of the red points in the scatter plot are confined to high-$ T_{eff} $ region, indicating a higher degree of fine-tuning in regular states than for 3 Smarticles. [all data from simulation].
+		%that regular states occupy an even smaller volume in configuration space than for random initial conditions almost never fall near regular states.
+	}
+	\label{fig:otherRun}
+\end{figure}
 
 \section{Broader impact}
 Our $ T_{eff}(\v{x}) $ is effectively a measure of instability of the configuration $ \v{x} $. Hence, a statement that at steady-state the systems tends to be found in configurations that are more stable (in places it does not leave) may seem tautological at first. However, the key here is that this measure is local -- depends only on the state $ \v{x} $ itself, and not on the rest of the landscape. Landauer's ``blowtorch theorem,'' \todo{cite} on the other hand, shows that for general nonequilibrium systems, the value of the steady-state probability at a point $ \v{x} $ can depend on system properties at any arbitrarily far-away points. Hence having any local quantity that is predictive of the $ p_{s.s.} $ is highly non-trivial and is indicative of additional structure in the system. It can, in some sense, be seen as a generalization of equilibrium thermodynamics -- there, detailed balance ensures that the steady-state is determined locally. In our case, on the other hand, we try to leverage the additional assumption of ``complexity'': we think of our system as so complex, high-dimensional, and ``generic'' that it can essentially be approximated as random. We argue that this is really the ``typical'' scenario -- while it can be violated, such a violation would require fine-tuning, which becomes progressively less likely in more complex high-dimensional systems.
