@@ -236,7 +236,8 @@ Finally, we can also frame our results in a somewhat different light.
 Thus, while the exact dynamics generally give a complicated $ p_{s.s.}(x) $, we can view $1/T_{eff}(x) $ as the least-informative approximation based on only local information.
 We think of approximating the system behavior by ``typical'' dynamics that match the local fluctuation amplitude of the system $ T_{eff}(x) $. Concretely, we find the maximum-entropy (or ``max-caliber'' \todo{cite}) probability distribution over trajectories $ P[\v{x}(t)] $, constraining the local velocity fluctuations: maximize 
 \begin{align*}
-\mathcal{S} = P[x] \;\log\(P[x]\) + \lambda_0 \( \int \mathcal{D} x \;P[x] - 1\) + \int dX \; \lambda(X) \(\sum _i \< \dot{x}_i\,\dot{x}_i\> _X - T_{eff}(X)\)
+\mathcal{S} = P[x] \;\log\(P[x]\) + \lambda_0 \( \int \mathcal{D} x \;P[x] - 1\) + \\
+\int dX \; \lambda(X) \(\sum _i \< \dot{x}_i\,\dot{x}_i\> _X - T_{eff}(X)\)
 \end{align*}, where $ \< \dot{x}_i\, \dot{x}_i\> _X \equiv \int \mathcal{D}x \; P[x] \,\int dt \; \dot{x}_i(t) \dot{x}_i(t) \,\delta(x(t) - X) $. This gives $ P[x(t)] \propto \exp{-\sum_i \int dt \; \lambda(x(t))\,\dot{x}_i(t)\dot{x}_i(t)} $, which corresponds \todo{uniquely} to the stochastic process $ \dot{x}_i = \sqrt{2\,T_{eff}(x)}\cdot \xi_i$, whose steady-state distribution is $ p_{s.s.}(x)\propto 1/T_{eff}(x) $. \todo{explain this paragraph better - too dense, and interesting}
 
 
@@ -264,16 +265,32 @@ For easier exploration of hypothesis space of this system, we have constructed a
 	\item In experiment, when resolving collision is too hard, the motor simply does not move (jams up). To allow for that possibility in simulation, we add an exit condition from the collision-resolving loop for when any one smarticle's temporary friction (from last bullet) becomes very large - as this serves as a proxy for how much force a motor must provide. We then move the most colliding arm back to its last time-step, and try collision-resolving again. If everything resolves, that arm will then have a chance to catch up to where it needed to be over the following ticks (its speed being capped at some $ \omega_{max} $).
 	\item The resulting simulation turns out to be too clean, despite the multiple stochastic elements of the algorithm, and so dynamical phases much more stable than in experiments. Since we want to study transition statistics, we must find ways to destabilize them. There are a number of places we can add more noise: slight fluctuations of smarticles' positions and angles at each tick, or proportional to each move, randomly varying gait amplitude, varying arm velocity, etc. Adding inertia or inter-Smarticle friction forces (see below) also helps to destabilize the dynamics.
 	\item The ring boundary is implemented similar to other smarticles, and collisions with it are resolved in the same loop. Alternatively, we can implement weakly confining potential to keep smarticles together in a more smooth way (for different experiments).
-	\item It is easy to adjust the simulation to give the Smarticle inertia: at each tick, simply move them according to last step's velocity. 
-	\item  If inter-Smarticle friction is 0, then each interaction force is directed normal to one Smarticle's surface. To include effects of such friction, we can add a small lateral component to these forces according to the interaction angle.  
+	\item It is easy to adjust the simulation to give the Smarticle inertia: at each tick, simply move them according to last step's velocity before resolving collisions.
+	\item  If inter-Smarticle friction is 0, then each interaction force is directed normal to one Smarticle's surface. To include effects of such friction, we can add a small lateral component to these forces that depends on the interaction angle.  
 %	we can also approximate the influence of inter-Smarticle friction by turning the interaction force from the surface normal slightly.
 \end{itemize}
 
-Even with all these additions, many differences remain between simulation and experiment: smarticles have non-zero thickness in experiments, friction forces between smarticles are often important on collisions, there are relief features on smarticle body not present in simulation that can get caught, etc. The consequence in this system is that while qualitative features can be recovered in the simulation, we don't generally expect quantitative agreement. We guess that these differences may become less important for ensembles with more smarticles -- as universal collective properties start to dominate. We also guess that analytical predictive power of least-rattling, or other similar techniques, could be more applicable in that regime.
+Even with all these additions, many differences remain between simulation and experiment: smarticles have non-zero thickness in experiments, there are relief features on smarticle body not present in simulation that can get caught, the precise force-response profile of the motors is not captured, etc. The consequence in this system is that while qualitative features can be recovered in the simulation, we don't generally expect precise quantitative agreement. We guess that these differences may be less important for ensembles with more smarticles -- as universal collective properties start to dominate. We also guess that analytical predictive power of least-rattling, or other similar techniques, could be more applicable in that regime.
 
 \section{Data analysis} \label{app:dataAnal}
 
-Once we have the tracked coordinates of the smarticles, we want to map the data into a ``collective behavior space'' -- something that can usefully inform us about the dynamical patterns of motion, especially those relevant for slow time-scales. This behavior space will typically be very high-dimensional, and to work with it we try to either cluster the data into different discrete behaviors (or dynamical phases), or perform a dimensionality-reduction to embed the data in a 2 or 3 dimensional space we can visualize (and could subsequently cluster if desired). In either case, what we care about is not the location of points in behavior space (which would be arbitrary anyway), but only about the distances between them -- i.e., some measures of similarity of different behaviors. 
+Once we have the tracked coordinates of the smarticles over time, either in experiment or simulation, we want to map the data into a ``collective behavior space'' -- something that can usefully inform us about the unique dynamical patterns of motion, which is what we ultimately care about. We can then look at the statistics of steady-state distributions in this space to make the figures shown above. 
+
+The entire configuration space of this system, which then uniquely determines the future dynamics (up to noise), consists of the 2D coordinates and orientations $ (x,y,\theta) $ of all the $ N $ Smarticles in the ensemble, as well as their arm angles $ (\alpha_1, \alpha_2) $. However, this $ 5N $-dimensional space has more information than we minimally need to determine next gait's collective behavior. 
+
+\subsection{Removing configurational symmetries}
+First, for all the experiments presented in this work, future arm motion is independent of all the other variables, and is uniquely (or statistically, for the random arm motion) determined by their current state. So the Smarticle coordinates $ (x,y,\theta) $ taken stroboscopically at times when $ (\alpha_1, \alpha_2) = (pi/2,pi/2)$ (U-shape, for all Smarticles) are sufficient to fully determine the future dynamical behavior. Note that this is harder to do precisely in experiment than in simulation, as we cannot track the arms directly, and so must make do with inferring the stroboscopic time-points from motion pattern of the bodies and the knowledge that arms are synchronized and exactly periodic for the entire run. 
+
+Second, because the confining ring is round, the system has a global rotation symmetry -- dynamical patterns that differ only by a global rotation should be counted as the same. To remove this unnecessary information from our data, the easiest way is to use only rotationally-symmetric observables. We can construct these from the $ 3N $-variables we have for each time-point by taking the coordinates of the c.o.m. $ \vec{X}= \frac{1}{3} \sum_i \vec{x}_i $ in the reference frame of each smarticle: $ \vec{\chi}_i \equiv \mathcal{R}(\theta_i) \cdot (\vec{X} - \vec{x}_i) $, where $ \mathcal{R}(\theta_i) $ is the rotation matrix for $ i $-th smarticle orientation (fig \ref{fig:relDat}). Note that this change of variables reduces the dimensionality of our configuration space down to $ 2N $ -- i.e., we lost much more information than just the global rotation. In particular, these new coordinates are entirely invariant under c.o.m. translations relative to the ring, which is relevant -- but we can assume it to be small for a confined system. Additionally, in these coordinates, a smarticle orientation matters more the further it is from c.o.m. -- but again, we can assume that their distance to c.o.m. stays relatively constant. More abstractly, we can get away with such imperfect choice because the errors caused by it are still small compared to the inherent noise in this system. 
+
+Finally third, we must remove Smarticle-permutation symmetry, since in these experiments all the Smarticles are treated as identical. As for rotation symmetry, we do this by changing variables to ones that are inherently permutation-invariant: the first three moments of the distribution of the three $ \{\chi_i\} $ at any fixed time. In order for these variables to have similar sensitivity to changes in raw data, it helps to ensure that they have the same units -- by raising them to the appropriate fractional powers. I.e., $ \mu_1 = \frac{1}{3} \sum_i \chi_i $, $ \mu_2 = \sqrt{\frac{1}{3} \sum_i (\chi_i-\mu_1)^2} $, $ \mu_3 = \sqrt[3]{\frac{1}{3} \sum_i (\chi_i-\mu_1)^3} $ (fig. \ref{fig:piDat}), etc.
+
+In the experiments presented here, we can track the 2D coordinates and orientations $ (x,y,\theta) $ of all the Smarticles in the ensemble (fig. \ref{fig:crdDat}) the entire configuration-space coordinates 
+
+For the experiments presented in this work, however, the raw data can directly give us On the other hand, the 2D coordinates and orientations $ (x,y,\theta) $ of all Smarticles at the start of a gait uniquely (up to noise) determine the ensemble's future evolution -- and we can thus assume a one-ot-one correspondence between the $ 3\,N $-dimensional configuration space (for an $ N $ Smarticle ensemble)
+
+
+we want to map the data into a ``collective behavior space'' -- something that can usefully inform us about the dynamical patterns of motion, especially those relevant for slow time-scales. This behavior space will typically be very high-dimensional, and to work with it we try to either cluster the data into different discrete behaviors (or dynamical phases), or perform a dimensionality-reduction to embed the data in a 2 or 3 dimensional space we can visualize (and could subsequently cluster if desired). In either case, what we care about is not the location of points in behavior space (which would be arbitrary anyway), but only about the distances between them -- i.e., some measures of similarity of different behaviors. 
 
 The raw data from particle tracking gives position and orientation time-traces $ (x_i(t), y_i(t), \theta_i(t)) $ for each smarticle (fig. \ref{fig:crdDat}), and contains lots of information that is irrelevant for the questions we care about. The first challenge in dealing with this is to chose a set of macroscopic observables of interest (such as collective angular velocity, or average pressure on the walls perhaps). We can then study the well-posed question of how much the different pieces of measured data affect these observables. In principle, understanding this would allow us to define a distance metric on our data space that we could then use for clustering or dimensionality reduction. There are some pieces of data which we know, from first principles, to be entirely irrelevant -- corresponding to symmetries in the system. In the simplest setup, these are global rotation symmetry, and smarticle permutation symmetry. Thus, two configurations that differ only by a permutation of smarticles should be considered to have distance =0. While these exact symmetries show us which data is entirely irrelevant, the biggest challenge is in identifying the relative importance of the remaining data for our questions. 
 
@@ -283,7 +300,7 @@ Doing this exactly is an insurmountable feat, and so we must resort to reasonabl
 \begin{figure} 
 	\begin{subfigure}[t]{0.4\textwidth}
 		\includegraphics[width=1\textwidth]{crdDat.eps}
-		\caption{Smarticle coordinates and angles as tracked from experiments \label{fig:crdDat}}
+		\caption{Time-traces of Smarticle coordinates and angles as tracked from experiments \label{fig:crdDat}}
 	\end{subfigure}
 	\begin{subfigure}[t]{0.4\textwidth}
 		\includegraphics[width=1\textwidth]{relDat.eps}
@@ -330,11 +347,15 @@ We use Matlab's built-in t-Distributed Stochastic Neighbor Embedding (tSNE) algo
 
 \subsection{Defining $ T_{eff} $} \label{app:defRatt}
 
+\section{Defining Rattling}
+\subsection{AS inference problem}
+\subsection{Max-entropy modelling}
+
+
 \section{Random dynamical systems}
 \subsection{Random Markov process}
 \subsection{Diffusion in random medium}
 \subsection{Random discrete map}
-\subsection{Max-entropy modelling}
 
 %\nocite{*}
 \bibliographystyle{unsrt}
