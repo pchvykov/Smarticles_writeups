@@ -104,6 +104,8 @@
 \newcommand{\bigO}[1]{O(#1)}  %order of (big O notation)
 \newcommand{\Op}{\mathcal{O}}  %operator
 \newcommand{\im}{i}  %imaginary
+\renewcommand{\Im}{\mbox{Im}}  %imaginary
+\renewcommand{\Re}{\mbox{Re}}  %imaginary
 \renewcommand{\todo}[1]{\textit{\color{red}[#1]}}
 \newcommand{\um}{$ \mathrm{\mu} $m}
 \renewcommand{\inf}{\infty}
@@ -234,7 +236,7 @@ It turns out we can make an even stronger statement if we consider the $ d $-dim
 
 Finally, we can also frame our results in a somewhat different light. 
 Thus, while the exact dynamics generally give a complicated $ p_{s.s.}(x) $, we can view $1/T_{eff}(x) $ as the least-informative approximation based on only local information.
-We think of approximating the system behavior by ``typical'' dynamics that match the local fluctuation amplitude of the system $ T_{eff}(x) $. Concretely, we find the maximum-entropy (or ``max-caliber'' \todo{cite}) probability distribution over trajectories $ P[\v{x}(t)] $, constraining the local velocity fluctuations: maximize 
+We think of approximating the system behavior by ``typical'' dynamics that match the local fluctuation amplitude of the system $ T_{eff}(x) $. Concretely, we find the maximum-entropy (or ``max-caliber'' \cite{dill18max_caliber}) probability distribution over trajectories $ P[\v{x}(t)] $, constraining the local velocity fluctuations: maximize 
 \begin{align*}
 \mathcal{S} = P[x] \;\log\(P[x]\) + \lambda_0 \( \int \mathcal{D} x \;P[x] - 1\) + \\
 \int dX \; \lambda(X) \(\sum _i \< \dot{x}_i\,\dot{x}_i\> _X - T_{eff}(X)\)
@@ -254,8 +256,12 @@ We think of approximating the system behavior by ``typical'' dynamics that match
 
 \appendix
 \renewcommand{\thesection}{\Alph{section}} 
-\section{Experiment details}
-Talk about Smarticle synchronization issue and experimental design decisions.
+\section{Experiment details} \label{app:experiment}
+
+Most of the Smarticle design and experiment setup details are described in a previous publication \todo{cite once out}. The key difference from the experiments in that work is that here the gaits of the different smarticles in the ensemble were kept synchronized throughout the runs, which is what allowed them to fall into regular dynamical patterns not previously observed. This synchronization was achieved by connecting a microphone sensor to an interrupt pin of the micro-controller in each smarticle, and then triggering every gait with a beep from external speaker placed next to the setup. This meant that all the smarticles stopped momentarily between consecutive gaits to listen for the trigger -- but this stop was kept down to a fraction of a second by carefully timing the triggering pulse-train with the gait period. The resulting setup was robust enough to keep the experiment running and synchronized indefinitely (limited only by battery life to about 1 hour). It also ensured that the arm motion was precisely periodic throughout the experiment, with no possibility for any phase drifts of fluctuations.  
+
+Another minor difference is that for the experiments presented in this work, the boundary ring was glued down for simplicity. Also, as mentioned, here we ran experiments with just 3 identical smarticles, rather than the more intricate setups of that paper. 
+
 
 \section{Simulation details} \label{app:simulation}
 For easier exploration of hypothesis space of this system, we have constructed a numerical simulation with the following algorithm. We approximate smarticles by three-segment lines (insets in fig. \ref{fig:dimRedSim}). At each time-step, the algorithm moves the arms slightly according to the chosen gait, and then iteratively cycles through smarticle pairs in random order, checking for collisions, and moving one in each pair slightly according to the net interaction force. If there are multiple points of contact for a given pair, the move is a translation in the direction of the total force, otherwise, it is a rotation about a pivot point chosen so as to balance the forces and torques. Choosing which in the pair moves is random, weighted by their relative friction coefficients (as motivated by difficulty of predicting static friction). Note that since a move can create new collisions with other smarticles, it is important to take small steps and iterate. The algorithm continues looping through pairs until all collisions are resolved, then proceeding to the next time-step. While this describes the core of the algorithm, there are a number of bells and whistles necessary to improve its stability and reliability:
@@ -345,15 +351,64 @@ Now that we have our feature vector, we can dimensionally reduce or cluster the 
 
 We use Matlab's built-in t-Distributed Stochastic Neighbor Embedding (tSNE) algorithm, which basically tries to embed the data in a 2D space preserving all the pair-wise distances as much as possible (fig. \ref{fig:dimRedExp}). It has the effect of largely preserving, or even highlighting, clusters in the original data, but also allows visualizing transitions between them and other hierarchical structure in the data. Note that the two pairs of clusters corresponding to the same pictures are chiral complements (the other two clusters correspond to non-chiral states). In section \ref{sec:dynPhaseTrans} below we will cluster this data and study the slow transition statistics between different dynamical phases.
 
-\subsection{Defining $ T_{eff} $} \label{app:defRatt}
+\section{Defining Rattling} \label{app:defRatt}
 
-\section{Defining Rattling}
-\subsection{AS inference problem}
+While the intuition that things end up in ``colder'' regions seems simple, it is not immediately clear how we should define a scalar quantity that would be quantitatively predictive of the steady-state probability density for a range of values -- not just as a binary ``high-low.'' While by analogy with Brownian motion $ \dot{x}_i = D_{ij}(x)\cdot \xi_j $ (Ito, where $ \xi_i(t) $ - univariate Gaussian white noise, indices $ \{i,j,k,n,m\} $ run over dimensions of the configuration space), we could define effective temperature as $ T_{ij}(x) = \frac{1}{2}\int ds \; \<\dot{x}_i(t),\dot{x}_j(s) \> $, it isn't a-priori clear what the range of integration should be, if any, especially if correlations don't really drop to zero, and what's the right way to construct a scalar from this. Additionally, we want to somehow filter out, at least partly, the periodic or cyclical part of the motion, which does not produce any probability drop. 
+
+\subsection{As inference problem}
+
+One perspective we can take on addressing these issues is by solving the following concrete problem. Let's assume that the underlying motion is indeed Brownian, governed by $ \dot{x}_i = D_{ij}(x)\cdot \xi_j $ [Ito], and we want to infer the inhomogeneous temperature tensor $ T(x) \equiv \frac{1}{2} D\, D^T $ from observations of trajectories. This amounts to a Bayesian inference problem: $ P\[T(x)\,|\,x(t)\]= P\[x(t)\,|\,T(x)\]\, P\[T(x)\]/Z $ ($ Z = P[x(t)] $ -- normalization). For our prior $ P\[T(x)\] $, we assume that temperature landscape varies smoothly over $ x $ -- otherwise we can never hope to estimate it from a finite observation of trajectory. Explicitly, this can be implemented via: $ P\[T(x)\] \propto \exp{-\epsilon \int d^d x\; \partial_k T_{ij} \partial_k T_{ij}}$. Additionally, from the distribution for Gaussian white noise, we get $ P\[x(t)\,|\,T(x)\] = \prod_t \[ \sqrt{\frac{1}{\det(4\pi T)}}\,\exp{-\frac{1}{4} T^{-1}_{ij}\dot{x}_i \dot{x}_j} \]$ this way:
+\begin{widetext}
+\begin{align*}
+ P\[T(x)\,|\,x(t)\] = \frac{1}{Z[x(t)]} \; \exp{-\int dt \[\frac{1}{2}\, \tr \log T(x(t)) + \frac{1}{4}\, T^{-1}_{ij}(x(t))\;\dot{x}_i(t)\,  \dot{x}_j(t)\]-\epsilon \int d^d x\; \partial_k T_{ij}\partial_k T_{ij}}
+\end{align*}
+\end{widetext}
+Note that, interestingly, we have an integral over time and another integral over configuration space in the exponent. We then want to choose some estimator for $ T(x) $. The easiest to evaluate here is the maximum-likelihood, which we can get by setting the variation $ \fd{\quad}{T(x)} $ of the exponent to 0, which gives:
+\begin{align*}
+4\epsilon\, \left. T_{in}T_{jm} \partial_k^2 T_{mn}\right|_X = T_{ij}(X) - \frac{1}{2}\<\dot{x}_i(t)\,  \dot{x}_j(t)\>_{t\; |\;x(t)=X}
+\end{align*}
+where the average is over all the times when trajectory $ x(t) $ passes through $ X $. So if we had a uniform prior $ \epsilon\rightarrow 0 $, then we get that $ T_{ij}(X) $ is simply the equal-time second-moment of velocity trajectories have at that point. For $ \epsilon>0 $, any deviations from this rule become sources for a diffusions equation, smoothing out the landscape -- and thus for small $ \epsilon $, we simply get that the average $ \<\cdot\> $ above is not only at $ X $, but over its neighborhood, weighted by a Gaussian kernel: $ T_{ij}(X) = \frac{1}{2}\<\dot{x}_i(t)\,  \dot{x}_j(t)\>_{t\; |\;(x(t)-X)^2 \,<\, \epsilon}$. 
+
+Now, we can use this result to take our trajectories $ x_i(t) $, which come from some non-diffusive dynamical system, and infer the temperature landscape that might have created such trajectories. This will always produce some result, regardless of how poor of a model diffusive behavior is for our dynamics. But if we do want to use the diffusive approximation, then this shows that we need only consider the equal-time correlator, rather than the integrated one. 
+
 \subsection{Max-entropy modelling}
+
+To motivate this diffusive approximation better, we can view it as maximum entropy modelling (or more precisely, ``maximum caliber,'' as in \cite{dill18max_caliber}). We ask, if we knew nothing about our dynamics besides the amplitude of fluctuations (2-point correlators) throughout the configuration space, what would be our most unbiased guess at what the dynamics really are? We can frame this question precisely by finding the maximum-entropy probability distribution over the space of possible trajectories $ \{x(t)\} $, under the constraint that two-point correlators match the data. As with all maximum-entropy modelling the result depends crucially on what we choose to constrain -- even with two-point functions, we have the freedom to choose between equal-time correlator, integrated correlator, different choices of spatial averaging, etc. Motivated by the above inference result, we will first try to constrain the equal-time correlator at every point in configuration space. Thus the entropy functional we want to maximize w.r.t. $ P[x(t)] $ is:
+\begin{widetext}
+\begin{align*}
+\mathcal{S} = P[x] \;\log\(P[x]\) + \lambda_0 \(1- \int \mathcal{D} x \;P[x]\) + 
+\int dX \; \lambda_{ij}(X) \(\frac{1}{2}\< \dot{x}_i\,\dot{x}_j\> _X - T_{ij}(X)\)
+\end{align*}
+\end{widetext}
+where $ \< \dot{x}_i\, \dot{x}_j\> _X \equiv \int \mathcal{D}x \; P[x] \,\int dt \; \dot{x}_i(t) \dot{x}_j(t) \,\delta(x(t) - X) $, and $ T_{ij}(X) $ is the corresponding quantity measured from the data. $ \lambda_0 $ and $ \lambda_{ij}(X) $ are Lagrange multipliers for the normalization and fluctuation constraints. As in the inference section above, we have an interesting mix of integrals over configuration space and over trajectory duration. Setting the variation $ \fd{\quad}{P[x]} $ to 0, we get:
+\begin{widetext}
+	\begin{align}
+	&1+ \log(P[x])+\lambda_0 + \int dX \; \lambda_{ij}(X) \int dt \; \dot{x}_i(t) \dot{x}_j(t) \,\delta(x(t) - X) =0\\
+	&\Rightarrow \qquad P[x]=\exp{-1-\lambda_{0}-\int dt \; \lambda_{ij}(x(t))\,\dot{x}_i(t) \dot{x}_j(t) } \label{eq:maxEnt}
+	\end{align} 
+\end{widetext}
+We must then set the Lagrange multipliers such that our constraints are satisfied. This means that $ \lambda_0 $ is chosen to give proper normalization, and $ \< \dot{x}_i\, \dot{x}_j\>_X = \frac{1}{2}\lambda^{-1}_{ij}(X) = 2 \,T_{ij}(X)$, giving us $ P[x]=\frac{1}{Z}\; \exp{-\frac{1}{4}\int dt \; T^{-1}_{ij}(x(t)) \,\dot{x}_i(t) \dot{x}_j(t)}  $. But this is precisely the probability distribution for the diffusive dynamics we looked at above $ \dot{x}_i = D_{ij}(x)\cdot \xi_j $, with $ T(x) = \frac{1}{2} D\, D^T $. 
+
+We can thus view our diffusive dynamics assumption as the natural unbiased approximation reproducing the 2-point correlators of the actual dynamics. It is curious to note here that this derivation is surprisingly fragile to the choice of constraint. If instead of equal-time correlator we chose to constrain anything else, such as integrated correlator, we would have no way to easily express $ \lambda_{ij}(X) $ in terms of $ T_{ij}(X) $ -- and in particular, the dependence would be non-local! This is because the distribution in eq.\ref{eq:maxEnt} is non-Gaussian, and so the two-point correlator is not in general simple. 
+
+\subsection{Filtering out periodic motion}
+Clearly, the diffusive approximation badly fails if you have motion around a limit-cycle. In this case, you exit a particular region of configuration space, only to come back there every time, and so without suppressing the steady-state probability of that region. Statistically, this break-down between exit rates and $ p_{s.s.} $ happens because entrance rates become strongly correlated with exit rates (see sec.\ref{app:randMarkov}). Either way, we need some way to filter out periodic motion from our estimates of effective temperature. To proceed, we can express our velocity, whose correlators we've been studying, in frequency space as $ \dot{x}_i = \Im\[\int d\omega \; \omega\, x_i(\omega)\] $. The evolution of this spectrum over time is basically what's plotted in fig.\ref{fig:reg}b. We can then try to filter it in different ways to remove any regular part of the motion. 
+
+For systems with periodic driving, we can simply suppress all signal at the driving frequency -- this does not guarantee that other emergent periodicity cannot happen, but it will remove the dominant source of regularities. In general, there is no objective way to tease apart regular from chaotic behaviors -- since to some extent it depends subjectively on the time-scale of observation of your system.  This is famously illustrated by the Fermi–Pasta–Ulam paradox, where dynamics that seemed chaotic at first, turned out to be exactly periodic on a longer time-scale. This is the key point where we rely on our assumption of ``complexity:'' we assume that typically, for real many-body interacting systems, the probability of a trajectory returning to an earlier configuration is indistinguishable from chance, after a sufficiently long delay time. Note that this is a strictly weaker assumption than saying that complex systems lose memory of where they were over time -- in fact, the entire point of this paper is to discuss what sort of long-term memory effects we can expect in such systems. 
+
+This thinking does motivate another way to estimate effective temperature from velocity spectrum: since we believe that most periodicity or organization in such systems should happen on faster time-scale, we can simply use a low-pass filter. E.g., in the wavelet transform of fig.\ref{fig:reg}b, we see the noise-component of the dynamics showing up as the broad-band in the lower-frequency range. Similarly, we can simply define the noise component as the broad-band part of the power-spectrum, after removing any sharply-peaked (narrow-band) features. This is also motivated by the intuition that white-noise is distinguished by having power at all frequencies. 
+
+This way, while at this point, we cannot make a precise argument for how to reliably separate out the truly chaotic part of the dynamics, there are a number of reasonable guesses we can make. Most definitively, we can say that at the end of the day, our chosen definition of effective temperature does seem to be predictive of the steady-state in our experiments. Moreover, this correlation remains largely unchanged for the different choices listed in this section. 
+
+\subsection{Constructing a scalar}
+
+With the above methods, we motivated how to measure effective temperature tensor $ T_{ij}(x) $ from the trajectory data. To predict the steady-state distribution, however, we must first convert this to a scalar $ \mathcal{R}(x) $, which we call Rattling, with the hypothesis that $ p_{s.s.}(x)\propto 1/\mathcal{R}(x) $. There are many ways we can construct a scalar out of a matrix, the two leading candidates being to take its trace or its determinant. As we have not yet been able to conclusively decide which of these two is more appropriate, following we present the arguments in favor of each choice.
+
+
 
 
 \section{Random dynamical systems}
-\subsection{Random Markov process}
+\subsection{Random Markov process} \label{app:randMarkov}
 \subsection{Diffusion in random medium}
 \subsection{Random discrete map}
 
