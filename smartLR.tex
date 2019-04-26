@@ -25,6 +25,8 @@
 \whenindex{a}{\alpha}{} \whenindex{b}{\beta}{} \whenindex{g}{\gamma}{} \whenindex{d}{\delta}{} \whenindex{e}{\varepsilon}{} \whenindex{m}{\mu}{} \whenindex{n}{\nu}{} \whenindex{l}{\lambda}{} \whenindex{k}{\kappa}{} \whenindex{r}{\rho}{} \whenindex{s}{\sigma}{} \whenindex{t}{\tau}{}
 \usepackage{todonotes}
 \usepackage{subcaption}
+\captionsetup{justification=raggedright,singlelinecheck=false}
+%\usepackage{subfig}
 % % Sets margins and page size
 %\pagestyle{empty} % Removes page numbers
 \usepackage{setspace}
@@ -76,7 +78,7 @@
 \let\divsymb=\div % rename builtin command \div to \divsymb
 \renewcommand{\div}[1]{\gv{\nabla} \cdot #1} % for divergence
 \newcommand{\curl}[1]{\gv{\nabla} \times #1} % for curl
-\newcommand{\tr}{\mbox{Tr}}
+\newcommand{\tr}{\mbox{tr}}
 \let\baraccent=\= % rename builtin command \= to \baraccent
 \renewcommand{\=}[1]{\stackrel{#1}{=}} % for putting numbers above =
 \renewcommand{\deg}{^{\circ}} %degree simbol
@@ -101,7 +103,7 @@
 \newcommand{\intmom}[2][4]{\int \frac{d^{#1} #2}{(2\pi)^{#1}}} % 4D momentum integral
 \newcommand{\intfn}{\int \mathcal{D}} %functional integral
 \newcommand{\D}{\mathcal{D}}
-\newcommand{\bigO}[1]{O(#1)}  %order of (big O notation)
+\newcommand{\bigO}[1]{O\(#1\)}  %order of (big O notation)
 \newcommand{\Op}{\mathcal{O}}  %operator
 \newcommand{\im}{i}  %imaginary
 \renewcommand{\Im}{\mbox{Im}}  %imaginary
@@ -353,11 +355,15 @@ We use Matlab's built-in t-Distributed Stochastic Neighbor Embedding (tSNE) algo
 
 \section{Defining Rattling} \label{app:defRatt}
 
-While the intuition that things end up in ``colder'' regions seems simple, it is not immediately clear how we should define a scalar quantity that would be quantitatively predictive of the steady-state probability density for a range of values -- not just as a binary ``high-low.'' While by analogy with Brownian motion $ \dot{x}_i = D_{ij}(x)\cdot \xi_j $ (Ito, where $ \xi_i(t) $ - univariate Gaussian white noise, indices $ \{i,j,k,n,m\} $ run over dimensions of the configuration space), we could define effective temperature as $ T_{ij}(x) = \frac{1}{2}\int ds \; \<\dot{x}_i(t),\dot{x}_j(s) \> $, it isn't a-priori clear what the range of integration should be, if any, especially if correlations don't really drop to zero, and what's the right way to construct a scalar from this. Additionally, we want to somehow filter out, at least partly, the periodic or cyclical part of the motion, which does not produce any probability drop. 
+While the intuition that things end up in ``colder'' regions seems simple, it is not immediately clear how we should define a scalar quantity that would be quantitatively predictive of the steady-state probability density for a range of values -- not just as a binary ``high-low.'' Consider the general diffusion process:
+\begin{align} \label{eq:MAID}
+ \dot{x}_i = D_{ij}(x)\cdot \xi_j \quad \mbox{[It\^o]}
+\end{align} 
+where $ \xi_i(t) $ - univariate Gaussian white noise: $ \<\xi_i\>=0 $ and $ \<\xi_i(t),\xi_j(s)\>=\delta_{ij}\,\delta(t-s) $, indices $ \{i,j,k,n,m\} $ run over the $ d $ dimensions of the configuration space, and temperature tensor is defined as $ T(x) \equiv \frac{1}{2} D\, D^T $. By analogy wit these dynamics, we could define effective temperature more generally as $ T_{ij}(x) = \frac{1}{2}\int ds \; \<\dot{x}_i(t),\dot{x}_j(s) \> $. However, it isn't a-priori clear what the range of integration should be, if any, especially if correlations don't really drop to zero, whether we should be taking only the connected part of this correlator, and what's the right way to construct a scalar from this so we can talk about $ p_{s.s.} $. Additionally, we want to somehow filter out, at least partly, the periodic or cyclical part of the motion, which does not produce any probability drop. 
 
-\subsection{As inference problem}
+\subsection{As inference problem} \label{app:inferT}
 
-One perspective we can take on addressing these issues is by solving the following concrete problem. Let's assume that the underlying motion is indeed Brownian, governed by $ \dot{x}_i = D_{ij}(x)\cdot \xi_j $ [Ito], and we want to infer the inhomogeneous temperature tensor $ T(x) \equiv \frac{1}{2} D\, D^T $ from observations of trajectories. This amounts to a Bayesian inference problem: $ P\[T(x)\,|\,x(t)\]= P\[x(t)\,|\,T(x)\]\, P\[T(x)\]/Z $ ($ Z = P[x(t)] $ -- normalization). For our prior $ P\[T(x)\] $, we assume that temperature landscape varies smoothly over $ x $ -- otherwise we can never hope to estimate it from a finite observation of trajectory. Explicitly, this can be implemented via: $ P\[T(x)\] \propto \exp{-\epsilon \int d^d x\; \partial_k T_{ij} \partial_k T_{ij}}$. Additionally, from the distribution for Gaussian white noise, we get $ P\[x(t)\,|\,T(x)\] = \prod_t \[ \sqrt{\frac{1}{\det(4\pi T)}}\,\exp{-\frac{1}{4} T^{-1}_{ij}\dot{x}_i \dot{x}_j} \]$ this way:
+One perspective we can take on addressing these issues is by solving the following concrete problem. Let's assume that the underlying motion is indeed Brownian, governed by eq.\ref{eq:MAID}, and we want to infer the inhomogeneous temperature tensor $ T(x) \equiv \frac{1}{2} D\, D^T $ from observations of trajectories. This amounts to a Bayesian inference problem: $ P\[T(x)\,|\,x(t)\]= P\[x(t)\,|\,T(x)\]\, P\[T(x)\]/Z $ ($ Z = P[x(t)] $ -- normalization). For our prior $ P\[T(x)\] $, we assume that temperature landscape varies smoothly over $ x $ -- otherwise we can never hope to estimate it from a finite observation of trajectory. Explicitly, this can be implemented via: $ P\[T(x)\] \propto \exp{-\epsilon \int d^d x\; \partial_k T_{ij} \partial_k T_{ij}}$. Additionally, from the distribution for Gaussian white noise, we get $ P\[x(t)\,|\,T(x)\] = \prod_t \[ \sqrt{\frac{1}{\det(4\pi T)}}\,\exp{-\frac{1}{4} T^{-1}_{ij}\dot{x}_i \dot{x}_j} \]$ this way:
 \begin{widetext}
 \begin{align*}
  P\[T(x)\,|\,x(t)\] = \frac{1}{Z[x(t)]} \; \exp{-\int dt \[\frac{1}{2}\, \tr \log T(x(t)) + \frac{1}{4}\, T^{-1}_{ij}(x(t))\;\dot{x}_i(t)\,  \dot{x}_j(t)\]-\epsilon \int d^d x\; \partial_k T_{ij}\partial_k T_{ij}}
@@ -367,13 +373,16 @@ Note that, interestingly, we have an integral over time and another integral ove
 \begin{align*}
 4\epsilon\, \left. T_{in}T_{jm} \partial_k^2 T_{mn}\right|_X = T_{ij}(X) - \frac{1}{2}\<\dot{x}_i(t)\,  \dot{x}_j(t)\>_{t\; |\;x(t)=X}
 \end{align*}
-where the average is over all the times when trajectory $ x(t) $ passes through $ X $. So if we had a uniform prior $ \epsilon\rightarrow 0 $, then we get that $ T_{ij}(X) $ is simply the equal-time second-moment of velocity trajectories have at that point. For $ \epsilon>0 $, any deviations from this rule become sources for a diffusions equation, smoothing out the landscape -- and thus for small $ \epsilon $, we simply get that the average $ \<\cdot\> $ above is not only at $ X $, but over its neighborhood, weighted by a Gaussian kernel: $ T_{ij}(X) = \frac{1}{2}\<\dot{x}_i(t)\,  \dot{x}_j(t)\>_{t\; |\;(x(t)-X)^2 \,<\, \epsilon}$. 
+where the average is over all the times when trajectory $ x(t) $ passes through $ X $. So if we had a uniform prior $ \epsilon\rightarrow 0 $, then we get that $ T_{ij}(X) $ is simply the equal-time second-moment of velocity trajectories have at that point. For $ \epsilon>0 $, any deviations from this rule become sources for a diffusions equation, smoothing out the landscape -- and thus for small $ \epsilon $, we simply get that the average $ \<\cdot\> $ above is not only at $ X $, but over its neighborhood, weighted by a Gaussian kernel: 
+\begin{align} \label{eq:Tij}
+T_{ij}(X) = \frac{1}{2}\<\dot{x}_i(t)\,  \dot{x}_j(t)\>_{t\; |\;(x(t)-X)^2 \,<\, \epsilon}.
+\end{align} 
 
 Now, we can use this result to take our trajectories $ x_i(t) $, which come from some non-diffusive dynamical system, and infer the temperature landscape that might have created such trajectories. This will always produce some result, regardless of how poor of a model diffusive behavior is for our dynamics. But if we do want to use the diffusive approximation, then this shows that we need only consider the equal-time correlator, rather than the integrated one. 
 
-\subsection{Max-entropy modelling}
+\subsection{Max-entropy modelling} \label{app:max-ent}
 
-To motivate this diffusive approximation better, we can view it as maximum entropy modelling (or more precisely, ``maximum caliber,'' as in \cite{dill18max_caliber}). We ask, if we knew nothing about our dynamics besides the amplitude of fluctuations (2-point correlators) throughout the configuration space, what would be our most unbiased guess at what the dynamics really are? We can frame this question precisely by finding the maximum-entropy probability distribution over the space of possible trajectories $ \{x(t)\} $, under the constraint that two-point correlators match the data. As with all maximum-entropy modelling the result depends crucially on what we choose to constrain -- even with two-point functions, we have the freedom to choose between equal-time correlator, integrated correlator, different choices of spatial averaging, etc. Motivated by the above inference result, we will first try to constrain the equal-time correlator at every point in configuration space. Thus the entropy functional we want to maximize w.r.t. $ P[x(t)] $ is:
+To motivate this diffusive approximation better, we can view it as maximum entropy modelling (or more precisely, ``maximum caliber,'' as in \cite{dill18max_caliber}). We ask, if we knew nothing about our dynamics besides the amplitude of fluctuations (2-point correlators) throughout the configuration space, what would be our most unbiased guess at what the dynamics really are? We can frame this question precisely by finding the maximum-entropy probability distribution over the space of possible trajectories $ \{x(t)\} $, under the constraint that two-point correlators match the data. As with all maximum-entropy modelling the result depends crucially on what we choose to constrain -- even with two-point functions, we have the freedom to choose between equal-time correlator, integrated correlator, different choices of spatial averaging, etc. Motivated by the above inference result (eq.\ref{eq:Tij}), we will first try to constrain the equal-time correlator at every point in configuration space. Thus the entropy functional we want to maximize w.r.t. $ P[x(t)] $ is:
 \begin{widetext}
 \begin{align*}
 \mathcal{S} = P[x] \;\log\(P[x]\) + \lambda_0 \(1- \int \mathcal{D} x \;P[x]\) + 
@@ -387,9 +396,9 @@ where $ \< \dot{x}_i\, \dot{x}_j\> _X \equiv \int \mathcal{D}x \; P[x] \,\int dt
 	&\Rightarrow \qquad P[x]=\exp{-1-\lambda_{0}-\int dt \; \lambda_{ij}(x(t))\,\dot{x}_i(t) \dot{x}_j(t) } \label{eq:maxEnt}
 	\end{align} 
 \end{widetext}
-We must then set the Lagrange multipliers such that our constraints are satisfied. This means that $ \lambda_0 $ is chosen to give proper normalization, and $ \< \dot{x}_i\, \dot{x}_j\>_X = \frac{1}{2}\lambda^{-1}_{ij}(X) = 2 \,T_{ij}(X)$, giving us $ P[x]=\frac{1}{Z}\; \exp{-\frac{1}{4}\int dt \; T^{-1}_{ij}(x(t)) \,\dot{x}_i(t) \dot{x}_j(t)}  $. But this is precisely the probability distribution for the diffusive dynamics we looked at above $ \dot{x}_i = D_{ij}(x)\cdot \xi_j $, with $ T(x) = \frac{1}{2} D\, D^T $. 
+We must then set the Lagrange multipliers such that our constraints are satisfied. This means that $ \lambda_0 $ is chosen to give proper normalization, and $ \< \dot{x}_i\, \dot{x}_j\>_X = \frac{1}{2}\lambda^{-1}_{ij}(X) = 2 \,T_{ij}(X)$, giving us $ P[x]=\frac{1}{Z}\; \exp{-\frac{1}{4}\int dt \; T^{-1}_{ij}(x(t)) \,\dot{x}_i(t) \dot{x}_j(t)}  $. But this is precisely the probability distribution for the diffusive dynamics we had in eq.\ref{eq:MAID}! 
 
-We can thus view our diffusive dynamics assumption as the natural unbiased approximation reproducing the 2-point correlators of the actual dynamics. It is curious to note here that this derivation is surprisingly fragile to the choice of constraint. If instead of equal-time correlator we chose to constrain anything else, such as integrated correlator, we would have no way to easily express $ \lambda_{ij}(X) $ in terms of $ T_{ij}(X) $ -- and in particular, the dependence would be non-local! This is because the distribution in eq.\ref{eq:maxEnt} is non-Gaussian, and so the two-point correlator is not in general simple. 
+We can thus view our diffusive dynamics assumption as the natural unbiased approximation reproducing the 2-point correlators of the actual dynamics. It is curious to note here that this derivation is surprisingly fragile to the choice of constraint. If instead of the equal-time correlator (eq.\ref{eq:Tij}) we chose to constrain anything else, such as integrated correlator, we would have no way to easily express $ \lambda_{ij}(X) $ in terms of $ T_{ij}(X) $ -- and in particular, the dependence would be non-local! This is because the distribution in eq.\ref{eq:maxEnt} is non-Gaussian, and so the two-point correlator is not in general simple. 
 
 \subsection{Filtering out periodic motion}
 Clearly, the diffusive approximation badly fails if you have motion around a limit-cycle. In this case, you exit a particular region of configuration space, only to come back there every time, and so without suppressing the steady-state probability of that region. Statistically, this break-down between exit rates and $ p_{s.s.} $ happens because entrance rates become strongly correlated with exit rates (see sec.\ref{app:randMarkov}). Either way, we need some way to filter out periodic motion from our estimates of effective temperature. To proceed, we can express our velocity, whose correlators we've been studying, in frequency space as $ \dot{x}_i = \Im\[\int d\omega \; \omega\, x_i(\omega)\] $. The evolution of this spectrum over time is basically what's plotted in fig.\ref{fig:reg}b. We can then try to filter it in different ways to remove any regular part of the motion. 
@@ -400,16 +409,136 @@ This thinking does motivate another way to estimate effective temperature from v
 
 This way, while at this point, we cannot make a precise argument for how to reliably separate out the truly chaotic part of the dynamics, there are a number of reasonable guesses we can make. Most definitively, we can say that at the end of the day, our chosen definition of effective temperature does seem to be predictive of the steady-state in our experiments. Moreover, this correlation remains largely unchanged for the different choices listed in this section. 
 
-\subsection{Constructing a scalar}
+\subsection{Constructing a scalar} \label{app:rattScalar}
 
-With the above methods, we motivated how to measure effective temperature tensor $ T_{ij}(x) $ from the trajectory data. To predict the steady-state distribution, however, we must first convert this to a scalar $ \mathcal{R}(x) $, which we call Rattling, with the hypothesis that $ p_{s.s.}(x)\propto 1/\mathcal{R}(x) $. There are many ways we can construct a scalar out of a matrix, the two leading candidates being to take its trace or its determinant. As we have not yet been able to conclusively decide which of these two is more appropriate, following we present the arguments in favor of each choice.
+With the above methods, we motivated how to measure effective temperature tensor $ T_{ij}(x) $ from the trajectory data. To predict the steady-state distribution, however, we must first convert this to a scalar $ \mathcal{R}(x) $, which we call Rattling, with the hypothesis that $ p_{s.s.}(x)\sim 1/\mathcal{R}(x) $. Note that no result like this can hold exactly in general, as the diffusion process in eq.\ref{eq:MAID} does not generally admit a closed-form analytical solution for the steady-state. This can be understood by recognizing that this stochastic process is generally not detailed-balanced, and so $ p_{s.s.}(x) $ can depend non-locally on values of $ D_{ij}(y) $ anywhere.
 
+Thus, all we can hope to get is an approximation of $ p_{s.s} $, and we can thus be motivated in the choice of an approximation by studying solvable limiting behaviors. The two leading candidates for a scalar that could work here are the trace of $ T_{ij} $ and its determinant. As we have not yet been able to conclusively decide which of these two is more generally appropriate, following we present the arguments in favor of each choice.
 
+The first argument to use the trace comes from the fact that for the isotropic limit of diffusion in eq.\ref{eq:MAID}: 
+\begin{align} \label{eq:MIID}
+\dot{x}_i = \sqrt{2\,T(x)}\cdot \xi_i
+\end{align}
+ (i.e., if the temperature tensor $ T_{ij}(x) = \delta_{ij}\,T(x) $), we get the Fokker-Planck equation $ \dot{p} = \partial_i^2(T(x)\, p) $, whose steady-state is $ p_{s.s.}\propto 1/T(x) \propto 1/\tr[T_{ij}(x)]$. Note that determinant here would $ = T^d $, with $ d $ -- dimensionality of configuration space, and so would not work here. The numerical tests in sec.\ref{app:randDiff} also support that $ p_{s.s.}\propto 1/\tr[T_{ij}(x)]$.
 
+Another argument in favor of trace comes from noting that if the inference in section \ref{app:inferT} were carried through from the assumption of isotropic temperature, the maximum-likelihood estimator for that scalar temperature would have been $ T(X) = \frac{1}{2}\, \sum_i \<\dot{x}_i(t)\,  \dot{x}_i(t)\>_{t\; |\;(x(t)-X)^2 \,<\, \epsilon} = \tr\[T_{ij}(X)\] $. Similarly, in section \ref{app:max-ent}, if instead of constraining the tensor $ \< \dot{x}_i\, \dot{x}_j\> _X $, we chose to constrain its trace, we would have landed again on eq.\ref{eq:MIID}, but if we instead chose to constrain its determinant, we could not arrive at any local closed-form result due to the additional non-linearity of determinant.
 
-\section{Random dynamical systems}
+The determinant, on the other hand, is nice in that it is consistent with composite systems. I.e., if we have two independent subsystems with $ p^{(1)}_{s.s.}(x) \propto 1/\det\[T^{(1)}\]$ and $ p^{(2)}_{s.s.}(y) \propto 1/\det\[T^{(2)}\]$, then the total $ p_{s.s.}(x,y)=p^{(1)}_{s.s.}(x) \, p^{(2)}_{s.s.}(y) \propto 1/\det\[T^{(1)}\,T^{(2)}\]$. In particular, if the temperature tensor takes the form $ T_{ij}(\vec{x})=\delta_{ij}\,T_i(x_i) $, where its $ i $-th component is independent of all $ \{x_j\}_{j\ne i} $, then the Fokker-Planck equation $ \dot{p} = \sum_i \partial_i^2 \(T_i(x_i)\, p\)$ has the steady-state $ p_{s.s.} \propto \prod_i 1/T_i(x) = 1/\det\[T_{ij}(x)\] $. We thus see that for different $ x $-dependencies of the temperature tensor, $ 1/p_{s.s.}(x) $ can be proportional to either the trace or the determinant -- we explore this cross-over directly in section \ref{app:randDiff} below.
+
+Another evidence in favor of the determinant is its behavior under coordinate-changes. This is of crucial importance, since the estimation of $ T_{ij} $ in eq. \ref{eq:Tij} is entirely dependent on how we choose to parametrize our data. In particular, looking at all the coordinate transformations described in appendix \ref{app:dataAnal}, we clearly see that the data parametrization we use to produce the plots in this paper is anything but simple or linear in any way -- and so the fact that the correlations still hold indicates the relationship must be reparametrization invariant. Concretely, if we change variables $ x_i \rightarrow y_i(\vec{x}) $, then the probability density picks up the Jacobian of the transformation $J(y) \equiv \det\[\partial^i y_j\] $ (where partial derivative is w.r.t. $ x $-coordinates), such that $ p_{s.s.}(x) \rightarrow \tilde{p}_{s.s.}(y)=p_{s.s.}(x(y))/J(y)$. Temperature tensor, on the other hand, transforms $ T_{ij}(x) \rightarrow \tilde{T}_{ij}(y)=T_{kl}(x(y)) \partial^k y_i\partial^ly_j$, and so $ \det\[\tilde{T}_{ij}\] = J^2 \det\[T_{ij}\] $. This way, the expression $ p_{s.s.}(x) \propto 1/\sqrt{\det\[T_{ij}(x)\]} $ is reparametrization-invariant. But what about this square root?
+
+We must also remember that by It\^o's lemma, a change of coordinates also introduces drift terms, such that the correct $ y $-dynamics for eq.\ref{eq:MAID} are $ \dot{y}_i = T_{jk}\,\partial^j\partial^k y_i + \partial^k y_i `D_{k}^{j}`\cdot\xi_j $. Thus, for 1D, or for 1D systems composed together as above, this drift ensures the correct transformation of the expression $ p_{s.s.}(x) \propto 1/T(x) $. In high dimensions, we could argue that unless the coordinate change is fine-tuned to the profile of $ T_{ij}(x) $, these drift terms may be small -- but also they are correlated with magnitude of $ T_{ij} $, and so may have a substantial effect on $ p_{s.s.} - T$ correlation.
+
+In all, it seems that the correct way to construct a scalar for rattling (such that $ p_{s.s.}\sim 1/\mathcal{R} $) may depend on the statistics of disorder in our dynamical system. Empirically, $ \mathcal{R} = \det\[T_{ij}\] $ seemed to be the most robust choice for the smarticle system above -- though we see some cases where the power $ p_{s.s.} \sim 1/\mathcal{R}^p $ deviates from 1, e.g., fig.\ref{fig:otherRun}a. In appendix \ref{app:randDynam} we explore other examples of dynamical systems where different choices for $ \mathcal{R} $ may be more reliable.
+
+\section{Random dynamical systems} \label{app:randDynam}
+
+In this section, we attempt to make more precise statements about ``typical'' dynamical systems and their steady-states by randomly constructing and analysing various types of such systems. With some of these we can make analytical progress, with others we must mostly resort to numerics. The general theme we are focusing on here is that while the exact steady-state at a point $ p_{s.s.}(x) $ will depend non-locally on system properties throughout configuration space, we can often construct a local observable (i.e., rattling $ \mathcal{R}(x) $), which is approximately predictive of the steady-state. 
+
 \subsection{Random Markov process} \label{app:randMarkov}
-\subsection{Diffusion in random medium}
+
+While we have up to this point only talked about dynamical systems with continuous state-space, the easiest example of random dynamics we can solve is a Markov process on $ N $ discrete states. Consider the master equation $ \dot{p}_i= \sum_j R_{ji}\, p_j - \sum_j R_{ij}\, p_i $, with $ i\in\{1,...,N\} $ labeling states. In general the steady-state distribution $ p_{s.s.}(i) $ is the null eigenvector of the transition-graph Laplacian matrix $ L_{ij}= -R_{ji} + \sum_j R_{ij} $, and thus will depend in a complicated way on all the $ N^2 $ transition rates. 
+
+Now, as we want to understand large disordered dynamical systems, we let the transition rates $ R_{ij} $ be independent identically distributed random variables, with some mean $ \bar{R} $ and standard deviation $ \sigma $, and let $ N \rightarrow \infty$. We now want to try finding the steady-state as an asymptotic series in powers of $ \frac{1}{N} $: $ p_{s.s.}(i) = p^{(0)}_i + p^{(1)}_i +... $. First, by the central limit theorem, we can write the mean entrance and exit rates for state $ i $ as:
+\begin{align*}
+\frac{1}{N} \sum_j R_{ji} = \bar{R} + \frac{\sigma\, \xi_i}{\sqrt{N}}\\
+ \frac{1}{N} \sum_j R_{ij} = \bar{R} + \frac{\sigma\, \zeta_i}{\sqrt{N}}
+\end{align*}
+respectively, where $ \xi_i $ and $ \zeta_i $ are univariate Gaussian random variables specifying the deviation of $ i $-th entrance and exit rate from the mean. We immediately see that at leading order, constant $ p^{(0)}_i =\frac{1}{N} $ is a self-consistent choice:
+\begin{align*}
+\dot{p} = \sum_j R_{ji}\, \frac{1}{N} - \sum_j R_{ij}\, \frac{1}{N} =  \bar{R} + \frac{\sigma\, \xi_i}{\sqrt{N}} - \bar{R} - \frac{\sigma\, \zeta_i}{\sqrt{N}}
+\end{align*}
+which vanishes for large $ N $. The first correction to the steady-state must further reduce $ \dot{p} $:
+\begin{align*}
+\frac{\sigma\, (\xi_i-\zeta_i)}{\sqrt{N}} +\sum_j R_{ji}\, p^{(1)}_j - \sum_j R_{ij}\, p^{(1)}_i \sim o\(\frac{1}{\sqrt{N}}\)
+\end{align*}
+(using the little-o notation). We can check that letting $ p^{(1)}_i =  \frac{\sigma\, (\xi_i-\zeta_i)}{\bar{R}\, N^{3/2}}$ accomplishes this:
+\begin{align*}
+\sum_j R_{ji}\, p^{(1)}_j - \sigma\, \zeta_i\; p^{(1)}_i\,\sqrt{N} \sim o\(\frac{1}{\sqrt{N}}\)
+\end{align*}
+where the second term is explicitly of $ \bigO{\frac{1}{N}} $, and the first term averages out to be of that order if $ R_{ji} $ is uncorrelated with $ p^{(1)}_j $. 
+
+This last assumption is the crucial step of the derivation, and plays a similar role to that of the molecular chaos assumption in equilibrium thermodynamics. In particular, it breaks time-reversal symmetry by distinguishing between exit and entrance currents for a given state $ i $: the former are all correlated as they are all $ \propto p^{(1)}_i $, while the latter average out as they are proportional to the independent random variables $ p^{(1)}_j $. In reality, this assumption does not exactly hold, as $ p^{(1)}_j $ depends on $ j $th exit rate $ \zeta_j $, which correlates with  $ R_{ji} $ -- but as all the rates are assumed independent, the effect of this correlation is suppressed by an additional factor of $ \frac{1}{N} $. Thus we see that if we introduce correlations in the rates $ R_{ij} $, this assumption will be the first failure mode of the derivation -- but by the same token, as long as it holds, so should our result. 
+
+Putting the pieces together, we thus get the approximate expression for the steady-state 
+\begin{align*}
+p_{s.s.}(i)= \frac{1}{N} + \frac{\sigma\, (\xi_i-\zeta_i)}{\bar{R}\, N^{3/2}} + \bigO{\frac{1}{N^2}}=\\
+\frac{1}{N} + \sum_j (R_{ji} - R_{ij})/(N^2\,\bar{R}) + \bigO{N^{-2}}
+\end{align*}
+So the steady-state probability at a states depends in an equal measure on both the exit, and the entrance rates of that state. In practice, however, the total entrance rate may be hard to measure, as it would require initializing the system in all possible configurations and seeing how often it enters $ i $. The exit rate, on the other hand, is akin to our measure of rattling -- it is basically a measure of how stable the state $ i $ is and only requires local measurements initialized in that state. While not enough to predict the steady-state exactly, it can already tell us a lot, and will be strongly correlated with it (see fig.\ref{fig:randDynamics})a.
+
+This way, we see that while in general we need all $ N^2 $ rates to predict the steady-state, the randomness in rates and large system size allow us to express it in terms of just $ 2 N $ local measurements of the exit and entrance rates.
+
+\subsection{Diffusion in random medium} \label{app:randDiff}
+
+Here we look more carefully at the generic multi-dimensional diffusion process of eq.\ref{eq:MAID}, reproduced here:
+\begin{align} \label{eq:MAID1}
+\dot{x}_i = D_{ij}(x)\cdot \xi_j \quad \mbox{[It\^o]}
+\end{align} 
+with $ T\equiv \frac{1}{2}D\,D^T $. As we cannot find the steady-state analytically, we study this numerically. Again, as we want to study some ``typical'' regime, we choose $ D_{ij}(x) $ landscape randomly, but so that it varies smoothly in $ x $. Explicitly, for each of $ d^2 $ entries of this matrix, we independently generate a random $ d $-dim grid of numbers $ \in(-1,1) $ (e.g., for $ d=4 $, this may be $ 5\times5\times5\times5 $), and then use cubic interpolation to fill in the values in-between, thus making a smooth landscape (e.g., making a $ 15\times15\times15\times15 $ grid). To then find the steady-state distribution, we explicitly construct the discretized Fokker-Planck operator $ \partial_i\partial_j\(T_{ij}(x) \,\cdot\,\) $ as a matrix, implementing periodic boundary conditions, and find its null eigenvector. Note that if we now view this matrix as the Laplacian matrix of a Markov jump process, as in section \ref{app:randMarkov} above, then the exit rates found on the diagonal, will be simply $ \tr\[T_{ij}\] $ (though this could be slightly different depending on the choice of discretization). Plotting the computed exact steady-state vs. trace or determinant of $ T_{ij} $ (fig. \ref{fig:randDiff}), we see that for this setup, trace correlates much better, and unlike determinant, scales linearly with $ p_{s.s.}^{-1} $. The correlation becomes more pronounced if, after constructing the diffusion tensor $ D_{ij}(x) $ as described above, we raise it to the 4th power to amplify its variation over $ x $ (fig.\ref{fig:randDiff4D_p4}).
+
+\begin{figure} 
+	\begin{subfigure}[t]{0.5\textwidth}
+		\caption{\label{fig:randDiff4D}}
+		\includegraphics[width=1\textwidth]{randDiff4D.pdf}
+	\end{subfigure}
+	\begin{subfigure}[t]{0.5\textwidth}
+		\caption{\label{fig:randDiff4D_p4}}
+		\includegraphics[width=1\textwidth]{randDiff4D_p4.pdf}
+	\end{subfigure}
+	\caption{Numerical results for 4D diffusion process in eq.\ref{eq:MAID1} with randomly varying diffusion tensor $ D_{ij}(x) $. (b) shows results when $ D(x) \rightarrow D^4(x) $ to allow larger amplitude variation. Linear regression slopes and correlation coefficients are listed above.} \label{fig:randDiff}
+\end{figure}
+
+We can run a couple other tests with this setup. First, we claim that this correlation crucially relies on the disorder and ``typicality'' of our chosen dynamics. Thus, we should be able to break it by introducing some fine-tuning or correlations into the diffusion landscape. In particular, if we have strong diffusion along a closed ring, then while $ \tr\[T_{ij}\] $ will be large there, it will not contribute to any suppression of $ p_{s.s.} $ as trajectories don't leave that ring any more frequently. We implement this scenario in 2D (for better visualization -- works same way in higher dimensions), as shown in fig. \ref{fig:randDiff2D_br}, second panel. We also see in the third panel that if the direction of enhanced diffusion is not aligned along the ring, then the correlation is restored -- illustrating that breaking it really requires strong fine-tuning.
+
+\begin{figure} 
+	\begin{subfigure}[t]{0.5\textwidth}
+		\caption{\label{fig:randDiff2D_br}}
+		\includegraphics[width=1\textwidth]{randDiff2D_break.png}
+	\end{subfigure}
+\begin{subfigure}[t]{0.5\textwidth}
+	\caption{\label{fig:trVdet_crossover}}
+	\includegraphics[width=1\textwidth]{trVdet_crossover.png}
+\end{subfigure}
+	
+	\caption{(a) Breaking the correlation by enhancing diffusion along a closed ring (in 2D). Insets show the $ \log\tr\[T_{ij}(x)\] $ landscape (boundaries are periodic, so the bright bands are actually closed). Three panels show respectively the setups with diffusion unperturbed random, enhanced along the ring, and orthogonal to the ring -- only the second case breaks the correlation. (b) Crossover from determinant to trace being predictive of $ p_{s.s.} $ as variation of $ D_{ii} $ along $ x_{j\neq i} $ dimensions is scaled up, showing the change of regression slope and correlation coefficient. Point grids illustrate how $ D_{yy} $ landscape is generated: random numbers are generated at black stars, and then cubic interpolation is taken at the blue query points, which form the landscape.} \label{fig:randDiff_more}
+\end{figure}
+
+Another correlation that we can introduce to the diffusion landscape to change our result is to make it a product of $ d $ 1D diffusion processes -- in which limit we expect $ p_{s.s.}\propto \det\[T_{ij}\] $, as discussed in section \ref{app:rattScalar}. Since thus far we've shown the trace is the one that is inversely linear with $ p_{s.s.} $, this would mean that we should see a crossover between the two regimes. To achieve that limit, let's first restrict $ D_{ij} $ to be diagonal, and then ensure that $ D_{ii} $ does not vary along all $ x_{j\neq i} $ dimensions. We can then smoothly tune up this cross variation $ var_{j\neq i}(D_{ii}) $ up to the full dependence $ D_{ii}(\vec{x}) $ to study the cross-over. Numerically, we implement this by first confining all interpolation query points along $ j\neq i $ dimension to a tiny range of the generated random grid (see description above), and then spreading them out to the max range (illustrated by point grids in fig.\ref{fig:trVdet_crossover}). As seen in fig.\ref{fig:trVdet_crossover} for 4D diffusion, we indeed see this crossover in regression slopes of our distributions. As shown by the correlation coefficient plot, on the other hand, despite changing slope, trace remains well-correlated with $ p_{s.s.} $ throughout, while determinant becomes uncorrelated as we approach full $ \vec{x} $-dependence (the regime in fig.\ref{fig:randDiff}).
+
+\subsection{Random force field}
+
+Most continuous dynamical systems can be written as a first-order system
+\begin{align*}
+\dot{x}_i = F_i(x,t)+\sqrt{2\,T}\;\xi_i
+\end{align*}
+If the system is sufficiently complex and high-dimensional, then we can try to gain insight about ``typical'' behaviors by letting the force-field $ F_i(x) $ be random. Turns out we can gain some analytical insights on this problem -- though the full result will still require numerics. 
+
+\subsubsection{Analytics}
+We consider a smoothly-varying force-landscape, which we can analytically construct by letting $ F_i(x) $ be Gaussian random field with $ \<F_i(x)\>=0 $ and $ \<F_i(x) F_j(y)\>=G_{ij}(x,y) $ -- some correlation function that decays with $ |x-y| $ (for cleaner notation, we focus on time-independent systems for now). As we are focusing on the effect of forces here, we take temperature to be a uniform scalar. This setup is nice in that if $ G $ decays very quickly in $ |x-y| $, it approximates diffusive behavior, as any trajectory $ x(t) $ experiences nearly independent forces over time. On the other hand, if there are system-spanning correlations in $ F(x) $, then the behavior is more like deterministic chaos, where trajectories separate faster the further apart they already are. We can thus hope to see these limiting behaviors emerge in our results, and try to understand the crossover.
+
+To evaluate a general observable $ \Op[x(t)] $ under disorder averaging, we must compute the partition function
+\begin{align*}
+Z[h_\Op] = \<\int \D x \; \exp{-\frac{1}{4T}\int dt\, \(\dot{x}_i - F_i(x)\)^2 + h_\Op \Op}\>_{F_i(x)}
+\end{align*}
+such that $ \<\Op\> = \left.\pd{Z[h_\Op]}{h_\Op} \right|_{h_\Op=0}$. Note that we can take the disorder average directly of $ \<Z\> $, rather that of $ \<\log Z\> $ because by construction our probabilities are already normalized, as $ Z[h_\Op=0]= $ const. independent of $ F_i(x) $. In a sense, time takes on the role of a replica-index, and just as we get replica-coupling, we will see that here we get global time-coupling.
+
+Evaluating the disorder average we thus get:
+\begin{widetext}
+	\begin{align*}
+Z[h_\Op] = \int \D x \; \mbox{exp}\Bigg[ &-\frac{1}{4T}\int dt\, \(\dot{x}_i^2 + G_{ii}(x,x)\) + 
+	\frac{1}{(4T)^2}\iint dt\, ds \(\frac{1}{2} G_{ij}^2\(x(t),x(s)\) + 2\, \dot{x}_i(t) \dot{x}_j(s) G_{ij}\(x(t),x(s)\)\) - \\
+	&-\frac{1}{(4T)^3}\iiint dt\, ds\, du \;\frac{2}{3} \dot{x}_i(t) \dot{x}_j(s) G_{ik}\(x(t),x(u)\) G_{jk}\(x(s),x(u)\) + h_\Op \Op \Bigg]
+\end{align*}
+\end{widetext}
+While this looks bad, it turns out we can build substantial intuition for the various terms if we think of it as a partition function for a polymer. From this perspective, the first integral just gives the energy of a Gaussian coil in an energy landscape given by $ \tr\[G(x)\] $ -- i.e., the polymer avoids regions with large amplitude $ F_i $, as the trajectory tends to leave these. The double integral then gives polymer self-interaction energy: the first term is an attractive force with range set by $ F(x) $ correlation length (i.e., if a particle spent time in some region before, then forces are probably weak there, and it will spend time there again); while the second term is a collimating-interaction (i.e., if a particle was moving one way in a region, it will probably move the same way next time it is in that region). Finally the triple integral gives a 3-point disorienting term. Note that in a high-dimensional configuration space, orientation-dependent forces will tend to be small unless the polymer is already tightly packed, and so can be ignored when we study how our trajectory first deviates from random exploration behavior. The self-attraction, thought, may already cause the polymer to form a globule and localize -- corresponding to localized regular dynamics.
+
+The exciting thing about this result is that while the global time-couplings that disorder averaging generates are entirely unnatural for a causal dynamical system, they are completely normal interaction for a polymer to have. We thus get a qualitative shift of description, and behaviors that were hard to describe from one perspective can become simple in the other. Speculatively, as polymers have no notion of causality, we can thus hope to see apparently a-causal behaviors, such as prediction or anticipation, emerge in the dynamics. However, as we have not yet explored these directions further, we now shift gears to show numerical results.
+
+\subsubsection{Numerics}
+Numerically, the simulation proceeds very much along the same lines as in section \ref{app:randDiff}: we construct a smoothly varying random force field, from which we build a discretized Fokker-Planck operator $ \partial_i(F_i(x)\,\cdot\,) + \partial_i^2(T\,\cdot\,) $ and find its null eigenvector. There are a few small changes we make compared to random diffusion runs. First, in generating the force landscape, we again start with the random $ d $-dim grid, but instead of interpolating between it, we just smooth it out by a $ d $-dim running average (set each point to the mean of its neighborhood). Again we do this independently for each component of $ F_i(x) $. This generates a more disordered field, as the other method introduces some complicated correlations, in particular along our cubic grid. While for the random diffusion simulation the two methods gave very similar results, and interpolation was more convenient for studying the trace-determinant crossover of fig.\ref{fig:trVdet_crossover}, here the correlations in fig.\ref{fig:} are much stronger  
+
+
 \subsection{Random discrete map}
 
 %\nocite{*}
