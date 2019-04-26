@@ -509,9 +509,9 @@ Another correlation that we can introduce to the diffusion landscape to change o
 \subsection{Random force field}
 
 Most continuous dynamical systems can be written as a first-order system
-\begin{align*}
-\dot{x}_i = F_i(x,t)+\sqrt{2\,T}\;\xi_i
-\end{align*}
+\begin{align} \label{eq:randForce}
+\dot{x}_i = F_i(x,t)+\sqrt{2\,T_0}\;\xi_i
+\end{align}
 If the system is sufficiently complex and high-dimensional, then we can try to gain insight about ``typical'' behaviors by letting the force-field $ F_i(x) $ be random. Turns out we can gain some analytical insights on this problem -- though the full result will still require numerics. 
 
 \subsubsection{Analytics}
@@ -531,15 +531,41 @@ Z[h_\Op] = \int \D x \; \mbox{exp}\Bigg[ &-\frac{1}{4T}\int dt\, \(\dot{x}_i^2 +
 	&-\frac{1}{(4T)^3}\iiint dt\, ds\, du \;\frac{2}{3} \dot{x}_i(t) \dot{x}_j(s) G_{ik}\(x(t),x(u)\) G_{jk}\(x(s),x(u)\) + h_\Op \Op \Bigg]
 \end{align*}
 \end{widetext}
-While this looks bad, it turns out we can build substantial intuition for the various terms if we think of it as a partition function for a polymer. From this perspective, the first integral just gives the energy of a Gaussian coil in an energy landscape given by $ \tr\[G(x)\] $ -- i.e., the polymer avoids regions with large amplitude $ F_i $, as the trajectory tends to leave these. The double integral then gives polymer self-interaction energy: the first term is an attractive force with range set by $ F(x) $ correlation length (i.e., if a particle spent time in some region before, then forces are probably weak there, and it will spend time there again); while the second term is a collimating-interaction (i.e., if a particle was moving one way in a region, it will probably move the same way next time it is in that region). Finally the triple integral gives a 3-point disorienting term. Note that in a high-dimensional configuration space, orientation-dependent forces will tend to be small unless the polymer is already tightly packed, and so can be ignored when we study how our trajectory first deviates from random exploration behavior. The self-attraction, thought, may already cause the polymer to form a globule and localize -- corresponding to localized regular dynamics.
+While this looks bad, it turns out we can build substantial intuition for the various terms if we think of it as a partition function for a polymer. From this perspective, the first integral just gives the energy of a Gaussian coil in an energy landscape given by $ \tr\[G(x)\] $ -- i.e., the polymer avoids regions with large amplitude $ F_i $, as the trajectory tends to leave these. The double integral then gives polymer self-interaction energy: the first term is an attractive force with range set by $ F(x) $ correlation length (i.e., if a particle spent time in some region before, then forces are probably weak there, and it will spend time there again); while the second term is a collimating-interaction (i.e., if a particle was moving one way in a region, it will probably move the same way next time it is in that region). Finally the triple integral gives a 3-point disorienting term. Note that in a high-dimensional configuration space, orientation-dependent forces will tend to be small unless the polymer is already tightly packed, and so can be ignored when we study how our trajectory first deviates from random exploration behavior. The self-attraction, thought, may already cause the polymer to form a globule and localize -- corresponding to localized regular dynamics. Finally, for time-dependent forces, the intuition generally persists, except now the polymer will self-interact only among certain segments. 
 
 The exciting thing about this result is that while the global time-couplings that disorder averaging generates are entirely unnatural for a causal dynamical system, they are completely normal interaction for a polymer to have. We thus get a qualitative shift of description, and behaviors that were hard to describe from one perspective can become simple in the other. Speculatively, as polymers have no notion of causality, we can thus hope to see apparently a-causal behaviors, such as prediction or anticipation, emerge in the dynamics. However, as we have not yet explored these directions further, we now shift gears to show numerical results.
 
 \subsubsection{Numerics}
-Numerically, the simulation proceeds very much along the same lines as in section \ref{app:randDiff}: we construct a smoothly varying random force field, from which we build a discretized Fokker-Planck operator $ \partial_i(F_i(x)\,\cdot\,) + \partial_i^2(T\,\cdot\,) $ and find its null eigenvector. There are a few small changes we make compared to random diffusion runs. First, in generating the force landscape, we again start with the random $ d $-dim grid, but instead of interpolating between it, we just smooth it out by a $ d $-dim running average (set each point to the mean of its neighborhood). Again we do this independently for each component of $ F_i(x) $. This generates a more disordered field, as the other method introduces some complicated correlations, in particular along our cubic grid. While for the random diffusion simulation the two methods gave very similar results, and interpolation was more convenient for studying the trace-determinant crossover of fig.\ref{fig:trVdet_crossover}, here the correlations in fig.\ref{fig:} are much stronger  
+Numerically, the simulation proceeds very much along the same lines as in section \ref{app:randDiff}: we construct a smoothly varying random force field, from which we build a discretized Fokker-Planck operator $ \partial_i(F_i(x)\,\cdot\,) + \partial_i^2(T\,\cdot\,) $ and find its null eigenvector. There are a few small changes we make compared to random diffusion runs. First, in generating the force landscape, we again start with the random $ d $-dim grid, but instead of interpolating between it, we just smooth it out by a $ d $-dim running average (set each point to the mean of its neighborhood). Again we do this independently for each component of $ F_i(x) $. This generates a more disordered field, as the other method introduces some complicated correlations, in particular along our cubic grid. While for the random diffusion simulation the two methods gave very similar results, and interpolation was more convenient for studying the trace-determinant crossover of fig.\ref{fig:trVdet_crossover}, here the correlations in fig.\ref{fig:randForce} turn out much weaker if we use interpolation. This may signify that in this setup, the relationship $ p_{s.s.}\sim 1/\mathcal{R} $ is more sensitive to correlations in $ F_{i}(x) $.
 
+Second, as we don't have an explicit temperature landscape here, we have to talk about the effective temperature, which we define, according to the discussion in sec.\ref{app:inferT}, as $ T_{ij}(x)\equiv F_i(x)F_j(x) + T_0 $, where $ T_0 $ is the inherent temperature from eq. \ref{eq:randForce}, which we assume to be negligible in comparison. This way $ \tr\[T_{ij}\] = F_i^2 $ is just the force magnitude, while determinant doesn't really have a natural interpretation in terms of the force. Finally, to make force fluctuations more pronounced, we scale $ F_i(x) \rightarrow F_i(x)\, |\vec{F}(x)|^3 $ after generating it, giving us the results in fig.\ref{fig:randForce}. 
+
+\begin{figure}
+	\includegraphics[width=0.5\textwidth]{randForce4D_p4.pdf}
+	\caption{Numerical results for motion in 4D random force field, per eq.\ref{eq:randForce}. Effective temperature tensor here $ T_{ij}(x) \equiv F_i(x)F_j(x) $. Regression slope and correlation coefficient are labeled above. \label{fig:randForce}}
+\end{figure}
+
+The first thing we note from these results is that both trace and determinant here are similarly well-correlated with $ p_{s.s.} $. We also note that $ p_{s.s.}(x) $ is no longer inverse linear with the trace, as it was in section \ref{app:randDiff}, but now $ p_{s.s.}(x) \sim 1/\sqrt{\tr\[T_{ij}(x)\]} $. This could be understood by seeing that in 1D, the Fokker-Planck dynamics $\dot{p}= \partial_x(F(x)\,p(x)) $ are stationary when $ p(x) \propto 1/F(x) = 1/\sqrt{T(x)} $, for our definition of effective temperature. 
+
+Finally, as in section \ref{app:randDiff}, we can break this correlation by introducing fine-tuned patterns into the force-field. E.g., enhancing the force field along a closed ring, similar as was done for fig. \ref{fig:randDiff2D_br}, produces qualitatively the same sort of results as shown in that figure. 
 
 \subsection{Random discrete map}
+
+For periodically driven systems, as some of our experiments with Smarticles, it may be useful to view the system stroboscopically, making the effective dynamics discrete in time. We can generally express this as:
+\begin{align}
+x_i(t+1)=f_i(\vec{x}(t)) + \sqrt{2\,T}\,\xi_i
+\end{align}
+This then gives the probability evolution, which can be expressed in terms of a transfer matrix: 
+%\begin{align*}
+%p_{t+1}(\vec{y}) =\frac{1}{\sqrt{4\pi T}} \int d^d x \; p_{t}(\vec{x})\,\e{- \frac{1}{4T}\(y_i - f_i(\vec{x})\)^2}
+%\end{align*}
+\begin{align*}
+&p_{t+1}(\vec{y})= \int d^d \vec{x} \;\mathcal{T}(\vec{y},\vec{x})\; p_{t}(\vec{x})\\
+&\mathcal{T}(\vec{y},\vec{x}) = \frac{1}{\sqrt{4\pi T}} \; \exp{- \frac{1}{4T}\(y_i - f_i(\vec{x})\)^2}
+\end{align*}
+The steady-state $ p_{s.s.} $ is thus the dominant eigenvector of $ \mathcal{T}(\vec{y},\vec{x}) $ (with the largest eigenvalue, $ =1 $).
+
+This gives yet another qualitatively distinct class of random dynamics we can study:
 
 %\nocite{*}
 \bibliographystyle{unsrt}
